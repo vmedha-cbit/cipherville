@@ -1,0 +1,232 @@
+[
+  {
+    "name": "Officer Neel Shah",
+    "dob": "12041995",
+    "background": "Cybercrime specialist with 8 years of experience. Known for his ability to track digital footprints across multiple networks. He once cracked a notorious ransomware operation that had been evading authorities for 2 years.",
+    "lastCase": "Operation Glass Veil - Digital Espionage Ring",
+    "story": "Neel has dedicated his career to understanding how criminals operate in the digital realm. His meticulous approach and technical expertise have made him invaluable in the cybercrime unit.",
+    "articleText": "On 12th April, Officer Neel Shah was spotted at the Annual Technology Security Summit where he delivered a keynote address on emerging cyber threats. The event, attended by tech industry leaders, highlighted his expertise in digital forensics.",
+    "qrLinks": ["qr-neel-1", "qr-neel-2"],
+    "destructedObject": "Encrypted Hard Drive",
+    "objectDescription": "A hard drive destroyed into multiple pieces during an evidence collection procedure",
+    "puzzlePieces": [
+      { "id": "p1", "x": 80, "y": 100 },
+      { "id": "p2", "x": 180, "y": 120 },
+      { "id": "p3", "x": 80, "y": 220 },
+      { "id": "p4", "x": 180, "y": 240 }
+    ],
+    "jumbledWord": "CYPHERED",
+    "routeOptions": [
+      { "label": "Dark Web Trail", "content": "False lead. Dead end.", "isCorrect": false },
+      { "label": "Server Farm Hunt", "content": "🔑 Year of Birth Revealed: 1995", "isCorrect": true },
+      { "label": "Cache Recovery", "content": "Corrupted data. Try again.", "isCorrect": false }
+    ]
+  },
+  {
+    "name": "Officer Priya Verma",
+    "dob": "23081992",
+    "background": "Forensic accountant specializing in financial crime. With 6 years of experience, she has uncovered over $50 million in fraudulent transactions. Her attention to detail and pattern recognition skills are legendary in the department.",
+    "lastCase": "Operation White Collar - Multi-million Dollar Fraud",
+    "story": "Priya's passion for justice stems from a personal experience. Her meticulous nature makes her the go-to officer for complex financial investigations.",
+    "articleText": "On 23rd August, Officer Priya Verma was recognized at the International Financial Crime Conference for her groundbreaking work in detecting sophisticated money laundering schemes.",
+    "qrLinks": ["qr-priya-1", "qr-priya-2"],
+    "destructedObject": "Ledger Book",
+    "objectDescription": "A shredded financial ledger scattered into pieces",
+    "puzzlePieces": [
+      { "id": "p1", "x": 90, "y": 110 },
+      { "id": "p2", "x": 190, "y": 110 },
+      { "id": "p3", "x": 90, "y": 210 },
+      { "id": "p4", "x": 190, "y": 210 }
+    ],
+    "jumbledWord": "BALANCED",
+    "routeOptions": [
+      { "label": "Offshore Account", "content": "Trail goes cold.", "isCorrect": false },
+      { "label": "Bank Records", "content": "🔑 Year of Birth Revealed: 1992", "isCorrect": true },
+      { "label": "Money Trail", "content": "Wrong direction.", "isCorrect": false }
+    ]
+  },
+  {
+    "name": "Officer Rajesh Kumar",
+    "dob": "15061988",
+    "background": "Homicide detective with 15 years on the force. Cleared 94% of his cases. Known for his intuition and ability to see patterns others miss. A mentor to many junior officers.",
+    "lastCase": "Midnight Killer Investigation - 47 Cases Solved",
+    "story": "Rajesh's career is defined by his unwavering commitment to bringing closure to grieving families. Every case is personal to him.",
+    "articleText": "On 15th June, Detective Rajesh Kumar received the Medal of Honor for his exceptional work in solving a decades-old cold case that brought peace to a family after 20 years.",
+    "qrLinks": ["qr-rajesh-1", "qr-rajesh-2"],
+    "destructedObject": "Case File Box",
+    "objectDescription": "A burnt and damaged evidence box containing case files",
+    "puzzlePieces": [
+      { "id": "p1", "x": 70, "y": 90 },
+      { "id": "p2", "y": 90, "x": 170 },
+      { "id": "p3", "x": 70, "y": 190 },
+      { "id": "p4", "x": 170, "y": 190 }
+    ],
+    "jumbledWord": "CLOSURE",
+    "routeOptions": [
+      { "label": "Witness Interview", "content": "Contradiction found.", "isCorrect": false },
+      { "label": "Cold Case Files", "content": "🔑 Year of Birth Revealed: 1988", "isCorrect": true },
+      { "label": "Autopsy Report", "content": "Inconclusive.", "isCorrect": false }
+    ]
+  },
+  {
+    "name": "Officer Aisha Patel",
+    "dob": "07021996",
+    "background": "Narcotics enforcement specialist with 4 years of undercover operations. Her cover identities are so convincing that she's never been exposed. Participated in 12 major drug busts.",
+    "lastCase": "Operation Snowfall - International Drug Trafficking",
+    "story": "Aisha works in the shadows, infiltrating organizations most officers couldn't dream of accessing. Her quick thinking and adaptability save lives.",
+    "articleText": "On 7th February, Officer Aisha Patel was mentioned in a community event promoting youth awareness about the dangers of drug abuse. Her undercover work contributed to dismantling a major trafficking network.",
+    "qrLinks": ["qr-aisha-1", "qr-aisha-2"],
+    "destructedObject": "Evidence Bag",
+    "objectDescription": "Torn evidence collection bags from field raids",
+    "puzzlePieces": [
+      { "id": "p1", "x": 85, "y": 105 },
+      { "id": "p2", "x": 185, "y": 105 },
+      { "id": "p3", "x": 85, "y": 205 },
+      { "id": "p4", "x": 185, "y": 205 }
+    ],
+    "jumbledWord": "UNDERCOVER",
+    "routeOptions": [
+      { "label": "Street Informant", "content": "Unreliable witness.", "isCorrect": false },
+      { "label": "Safe House Records", "content": "🔑 Year of Birth Revealed: 1996", "isCorrect": true },
+      { "label": "Surveillance Feed", "content": "Tape corrupted.", "isCorrect": false }
+    ]
+  },
+  {
+    "name": "Officer Marcus Thompson",
+    "dob": "19111990",
+    "background": "Weapons and explosives expert. Defused over 300 devices throughout his 10-year career. His calm demeanor under pressure is the stuff of Dept legend. One wrong move and thousands could be at risk.",
+    "lastCase": "Operation Detonation - Homemade Bomb Ring",
+    "story": "Every device Marcus faces could be his last. Yet he approaches each one with the same precision and focus. He's saved countless lives.",
+    "articleText": "On 19th November, Officer Marcus Thompson was honored at a public safety ceremony for his extraordinary heroism in safely evacuating a building and neutralizing an improvised explosive device discovered in downtown area.",
+    "qrLinks": ["qr-marcus-1", "qr-marcus-2"],
+    "destructedObject": "Circuit Board",
+    "objectDescription": "Fragmented explosive device components sealed as evidence",
+    "puzzlePieces": [
+      { "id": "p1", "x": 75, "y": 95 },
+      { "id": "p2", "x": 175, "y": 115 },
+      { "id": "p3", "x": 75, "y": 215 },
+      { "id": "p4", "x": 175, "y": 195 }
+    ],
+    "jumbledWord": "DEFUSED",
+    "routeOptions": [
+      { "label": "Bomb Factory", "content": "Deserted location.", "isCorrect": false },
+      { "label": "Trigger Mechanism", "content": "🔑 Year of Birth Revealed: 1990", "isCorrect": true },
+      { "label": "Chemical Lab", "content": "Wrong compound type.", "isCorrect": false }
+    ]
+  },
+  {
+    "name": "Officer Sophia Chen",
+    "dob": "03051997",
+    "background": "Behavioral analyst and profiler. Her psychological insights have helped solve 38 complex cases. She can read a crime scene like a book, understanding the perpetrator's mindset and motivations.",
+    "lastCase": "Serial Pattern Analysis - 8 Connected Cases",
+    "story": "Sophia sees what others don't. In the chaos of a crime scene, she finds meaning. Her profiles are so accurate they've become the gold standard in training.",
+    "articleText": "On 3rd May, Officer Sophia Chen presented her research on criminal behavior patterns at the National Law Enforcement Psychology Conference, impacting investigative techniques nationwide.",
+    "qrLinks": ["qr-sophia-1", "qr-sophia-2"],
+    "destructedObject": "Psychology Textbook",
+    "objectDescription": "Damaged behavioral analysis reference materials",
+    "puzzlePieces": [
+      { "id": "p1", "x": 80, "y": 100 },
+      { "id": "p2", "x": 180, "y": 120 },
+      { "id": "p3", "x": 80, "y": 220 },
+      { "id": "p4", "x": 180, "y": 200 }
+    ],
+    "jumbledWord": "PROFILED",
+    "routeOptions": [
+      { "label": "Suspect Interview", "content": "Misleading confession.", "isCorrect": false },
+      { "label": "Behavioral Database", "content": "🔑 Year of Birth Revealed: 1997", "isCorrect": true },
+      { "label": "Psychological Exam", "content": "Inconclusive results.", "isCorrect": false }
+    ]
+  },
+  {
+    "name": "Officer David Lopez",
+    "dob": "28091989",
+    "background": "Organized crime specialist with 12 years fighting systemic corruption. He's infiltrated cartels, biker gangs, and street organizations. His work dismantled a major syndicate in the region.",
+    "lastCase": "Operation Kingpin - Organized Crime Network",
+    "story": "David doesn't just chase criminals. He understands their networks, hierarchies, and operations. He thinks like they do to stay one step ahead.",
+    "articleText": "On 28th September, Officer David Lopez was featured in a major publication detailing his undercover infiltration of a criminal organization that spanned three states.",
+    "qrLinks": ["qr-david-1", "qr-david-2"],
+    "destructedObject": "Crime Map",
+    "objectDescription": "Shredded territorial maps and gang communication documents",
+    "puzzlePieces": [
+      { "id": "p1", "x": 90, "y": 100 },
+      { "id": "p2", "x": 190, "y": 110 },
+      { "id": "p3", "x": 90, "y": 210 },
+      { "id": "p4", "x": 190, "y": 220 }
+    ],
+    "jumbledWord": "SYNDICATE",
+    "routeOptions": [
+      { "label": "Gang Territory", "content": "Wrong jurisdiction.", "isCorrect": false },
+      { "label": "Crime Database", "content": "🔑 Year of Birth Revealed: 1989", "isCorrect": true },
+      { "label": "Street Informant", "content": "False information.", "isCorrect": false }
+    ]
+  },
+  {
+    "name": "Officer Emma Wilson",
+    "dob": "11031994",
+    "background": "Cybersecurity and digital forensics expert. She recovers data from damaged devices and uncovers hidden communications. Her technical breakthroughs have revolutionized how the department handles digital evidence.",
+    "lastCase": "Operation Data Ghost - Dark Web Marketplace",
+    "story": "Emma speaks the language of code and circuits. In the digital underworld, she's invisible but everywhere. Her work has convicted 23 cybercriminals.",
+    "articleText": "On 11th March, Officer Emma Wilson was recognized for her groundbreaking work in recovering deleted evidence from encrypted devices, which became instrumental in solving a major white-collar crime case.",
+    "qrLinks": ["qr-emma-1", "qr-emma-2"],
+    "destructedObject": "Damaged Laptop",
+    "objectDescription": "Burnt and smashed computer components from an arson case",
+    "puzzlePieces": [
+      { "id": "p1", "x": 85, "y": 105 },
+      { "id": "p2", "x": 185, "y": 125 },
+      { "id": "p3", "x": 85, "y": 205 },
+      { "id": "p4", "x": 185, "y": 225 }
+    ],
+    "jumbledWord": "ENCRYPTED",
+    "routeOptions": [
+      { "label": "Deleted Files", "content": "Irrecoverable data.", "isCorrect": false },
+      { "label": "Data Recovery Lab", "content": "🔑 Year of Birth Revealed: 1994", "isCorrect": true },
+      { "label": "Server Backup", "content": "Corrupted archives.", "isCorrect": false }
+    ]
+  },
+  {
+    "name": "Officer James Patterson",
+    "dob": "22071991",
+    "background": "Violent crimes unit head with 14 years of experience. He's led task forces that have caught some of the most dangerous criminals in the state. His tactical knowledge and leadership are unmatched.",
+    "lastCase": "Operation Takedown - Gang Violence Suppression",
+    "story": "James commands respect through his tactical excellence and unwavering dedication to victim justice. He turns information into action and saves lives.",
+    "articleText": "On 22nd July, Officer James Patterson was celebrated at a community safety event for leading a major gang violence suppression operation that reduced street crimes by 40% in targeted areas.",
+    "qrLinks": ["qr-james-1", "qr-james-2"],
+    "destructedObject": "Tactical Vest",
+    "objectDescription": "Evidence from a major tactical operation, torn and damaged",
+    "puzzlePieces": [
+      { "id": "p1", "x": 80, "y": 110 },
+      { "id": "p2", "x": 180, "y": 110 },
+      { "id": "p3", "x": 80, "y": 210 },
+      { "id": "p4", "x": 180, "y": 210 }
+    ],
+    "jumbledWord": "TACTICAL",
+    "routeOptions": [
+      { "label": "Street Operation", "content": "Operation relocated.", "isCorrect": false },
+      { "label": "Task Force Records", "content": "🔑 Year of Birth Revealed: 1991", "isCorrect": true },
+      { "label": "Suspect Lineup", "content": "Unreliable identification.", "isCorrect": false }
+    ]
+  },
+  {
+    "name": "Officer Nina Kapoor",
+    "dob": "09121993",
+    "background": "Robbery and theft specialist. She has an extraordinary ability to trace stolen goods through black market networks. Her work has recovered over $20 million in stolen assets. Sharp-eyed and relentless.",
+    "lastCase": "Operation Artifact - Museum Heist Ring",
+    "story": "Nina knows every fence, collector, and dealer in the underground world. Nothing stays hidden from her for long. She's a detective's detective.",
+    "articleText": "On 9th December, Officer Nina Kapoor was honored for her exceptional work in recovering priceless artifacts stolen from a museum and dismantling an international theft ring.",
+    "qrLinks": ["qr-nina-1", "qr-nina-2"],
+    "destructedObject": "Jewelry Box",
+    "objectDescription": "Shattered jewelry box with scattered stolen items as evidence",
+    "puzzlePieces": [
+      { "id": "p1", "x": 75, "y": 100 },
+      { "id": "p2", "x": 175, "y": 110 },
+      { "id": "p3", "x": 75, "y": 210 },
+      { "id": "p4", "x": 175, "y": 220 }
+    ],
+    "jumbledWord": "REVEALED",
+    "routeOptions": [
+      { "label": "Black Market Contact", "content": "Dealer disappeared.", "isCorrect": false },
+      { "label": "Stolen Goods Registry", "content": "🔑 Year of Birth Revealed: 1993", "isCorrect": true },
+      { "label": "Fence Network", "content": "Trail is cold.", "isCorrect": false }
+    ]
+  }
+]

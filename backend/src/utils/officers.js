@@ -1,0 +1,122 @@
+[
+  {
+    "id": "OFF01",
+    "name": "Raghav Mehta",
+    "dob": "10071989",
+    "day": "10",
+    "month": "07",
+    "year": "1989",
+    "caseId": "CASE01",
+    "jumbled": "TATINOSB",
+    "answer": "STATION",
+    "puzzleFolder": "puzzle7"
+  },
+  {
+    "id": "OFF02",
+    "name": "Arjun Malhotra",
+    "dob": "21031992",
+    "day": "21",
+    "month": "03",
+    "year": "1992",
+    "caseId": "CASE02",
+    "jumbled": "REVRES",
+    "answer": "SERVER",
+    "puzzleFolder": "puzzle3"
+  },
+  {
+    "id": "OFF03",
+    "name": "Kiran Rao",
+    "dob": "05011990",
+    "day": "05",
+    "month": "01",
+    "year": "1990",
+    "caseId": "CASE03",
+    "jumbled": "YREUQ",
+    "answer": "QUERY",
+    "puzzleFolder": "puzzle1"
+  },
+  {
+    "id": "OFF04",
+    "name": "Suresh Iyer",
+    "dob": "18081988",
+    "day": "18",
+    "month": "08",
+    "year": "1988",
+    "caseId": "CASE04",
+    "jumbled": "ATADABES",
+    "answer": "DATABASE",
+    "puzzleFolder": "puzzle8"
+  },
+  {
+    "id": "OFF05",
+    "name": "Nikhil Verma",
+    "dob": "27021991",
+    "day": "27",
+    "month": "02",
+    "year": "1991",
+    "caseId": "CASE05",
+    "jumbled": "ECNEDIVE",
+    "answer": "EVIDENCE",
+    "puzzleFolder": "puzzle2"
+  },
+  {
+    "id": "OFF06",
+    "name": "Amit Kulkarni",
+    "dob": "14061987",
+    "day": "14",
+    "month": "06",
+    "year": "1987",
+    "caseId": "CASE01",
+    "jumbled": "CITROENSF",
+    "answer": "FORENSIC",
+    "puzzleFolder": "puzzle6"
+  },
+  {
+    "id": "OFF07",
+    "name": "Vikas Sharma",
+    "dob": "09041993",
+    "day": "09",
+    "month": "04",
+    "year": "1993",
+    "caseId": "CASE02",
+    "jumbled": "ATAD",
+    "answer": "DATA",
+    "puzzleFolder": "puzzle4"
+  },
+  {
+    "id": "OFF08",
+    "name": "Pranav Desai",
+    "dob": "30091986",
+    "day": "30",
+    "month": "09",
+    "year": "1986",
+    "caseId": "CASE03",
+    "jumbled": "KCATNART",
+    "answer": "TRACKANT",
+    "puzzleFolder": "puzzle9"
+  },
+  {
+    "id": "OFF09",
+    "name": "Rahul Sengupta",
+    "dob": "16051994",
+    "day": "16",
+    "month": "05",
+    "year": "1994",
+    "caseId": "CASE04",
+    "jumbled": "TSOP",
+    "answer": "POST",
+    "puzzleFolder": "puzzle5"
+  },
+  {
+    "id": "OFF10",
+    "name": "Manish Choudhary",
+    "dob": "23121985",
+    "day": "23",
+    "month": "12",
+    "year": "1985",
+    "caseId": "CASE05",
+    "jumbled": "GOL",
+    "answer": "LOG",
+    "puzzleFolder": "puzzle12"
+  }
+]
