@@ -8,7 +8,7 @@ export const env = {
   JWT_SECRET: process.env.JWT_SECRET || "",
   ADMIN_DEFAULT_USER: process.env.ADMIN_DEFAULT_USER || "admin",
   ADMIN_DEFAULT_PASS: process.env.ADMIN_DEFAULT_PASS || "admin",
-  CLIENT_ORIGIN: process.env.CLIENT_ORIGIN || "http://localhost:5173",
+  CLIENT_ORIGIN: process.env.CLIENT_ORIGIN || "https://cipherville.vercel.app",
   UPLOAD_DIR: process.env.UPLOAD_DIR || "./storage/uploads",
   SQLITE_TEMPLATE_DIR: process.env.SQLITE_TEMPLATE_DIR || "./storage/sqlite-templates",
   SQLITE_USER_DIR: process.env.SQLITE_USER_DIR || "./storage/sqlite-user",

@@ -7,7 +7,7 @@ export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const instance = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:4000", {
+    const instance = io(import.meta.env.VITE_SOCKET_URL || "https://cipherville.vercel.app", {
       autoConnect: true
     });
     setSocket(instance);
