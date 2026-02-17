@@ -43,6 +43,11 @@ export const puzzleConfigs = {
   puzzle10: {
     layout: ["p1", "p2", "p3", "p4", "key_5", "key_6", "p7", "p8", "key_9"],
     correctKeys: ["key_5", "key_6", "key_9"]
+  },
+  
+  puzzle12: {
+    layout: ["p1", "p2", "p3", "p4", "key_5", "p6", "key_7", "key_8", "p9"],
+    correctKeys: ["key_5", "key_7", "key_8"]
   }
 };
 

@@ -196,7 +196,7 @@ export default function DbLogin() {
         className="fixed bottom-8 left-1/2 -translate-x-1/2 px-8 py-3 bg-card border border-primary/30 rounded-full text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all shadow-[0_0_20px_rgba(0,0,0,0.3)] flex items-center gap-3 z-50 group backdrop-blur-sm"
       >
         <span className="text-xl group-hover:rotate-12 transition-transform">📋</span>
-        <span className="font-bold tracking-wide text-sm">OFFICER BRIEFING</span>
+        <span className="font-bold tracking-wide text-sm">Go to Officer clues</span>
       </button>
     </div>
   );
