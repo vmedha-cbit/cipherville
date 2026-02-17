@@ -6,8 +6,12 @@ import { emitRoom } from "../socket/index.js";
 
 export const createRoom = async (req, res, next) => {
   try {
+    const { timerDuration } = req.body || {};
     const roomId = makeId(6).toUpperCase();
-    const room = await Room.create({ roomId });
+    const room = await Room.create({ 
+      roomId,
+      timerDuration: timerDuration || 1800 // Default 30 minutes (1800 seconds)
+    });
     res.json(room);
   } catch (err) {
     next(err);
@@ -109,6 +113,23 @@ export const roomPlayers = async (req, res, next) => {
       return res.status(404).json({ error: "Room not found" });
     }
     res.json(room.participants);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getRoomTimer = async (req, res, next) => {
+  try {
+    const { roomId } = req.params;
+    const room = await Room.findOne({ roomId });
+    if (!room) {
+      return res.status(404).json({ error: "Room not found" });
+    }
+    res.json({
+      startedAt: room.startTime,
+      timerDuration: room.timerDuration || 1800,
+      status: room.status
+    });
   } catch (err) {
     next(err);
   }

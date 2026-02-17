@@ -1,7 +1,7 @@
 import { Officer } from "../models/Officer.js";
 import { Story } from "../models/Story.js";
 import { User } from "../models/User.js";
-import { Room } from "../models/Room.js";
+import { GameConfig } from "../models/GameConfig.js";
 
 export const createOfficer = async (req, res, next) => {
   try {
@@ -47,12 +47,50 @@ export const deleteOfficer = async (req, res, next) => {
 
 export const dashboard = async (req, res, next) => {
   try {
-    const [rooms, users, stories] = await Promise.all([
-      Room.find().sort({ createdAt: -1 }),
-      User.find().sort({ createdAt: -1 }),
-      Story.find().sort({ createdAt: -1 })
+    const [users, stories, officers] = await Promise.all([
+      User.find().sort({ createdAt: -1 }).select("rollNumber displayName phase gameStatus gameStartedAt timerDuration completedAt startedAt progressTracking attempts"),
+      Story.find().sort({ createdAt: -1 }).limit(10),
+      Officer.find().sort({ createdAt: -1 }).limit(10)
     ]);
-    res.json({ rooms, users, stories });
+    
+    // Add timer info and completion type to each user
+    const usersWithTimer = users.map(user => {
+      const userObj = user.toObject();
+      
+      // Calculate timer info
+      if (user.gameStartedAt && user.gameStatus === "playing") {
+        const now = new Date();
+        const startedAt = new Date(user.gameStartedAt);
+        const elapsed = Math.floor((now - startedAt) / 1000);
+        const duration = user.timerDuration || 1800;
+        userObj.timeRemaining = Math.max(0, duration - elapsed);
+        userObj.isExpired = userObj.timeRemaining === 0;
+        userObj.isPanic = userObj.timeRemaining > 0 && userObj.timeRemaining <= 300;
+      } else {
+        userObj.timeRemaining = null;
+        userObj.isExpired = false;
+        userObj.isPanic = false;
+      }
+      
+      // Calculate completion type and time
+      if (user.completedAt) {
+        userObj.completionTime = new Date(user.completedAt) - new Date(user.startedAt);
+        userObj.completionType = "completed";
+      } else if (user.gameStatus === "timeout") {
+        userObj.completionType = "timeout";
+        userObj.completionTime = null;
+      } else if (user.gameStatus === "playing") {
+        userObj.completionType = "in-progress";
+        userObj.completionTime = null;
+      } else {
+        userObj.completionType = "partial";
+        userObj.completionTime = null;
+      }
+      
+      return userObj;
+    });
+    
+    res.json({ users: usersWithTimer, stories, officers });
   } catch (err) {
     next(err);
   }
@@ -211,8 +249,7 @@ export const seedDemoData = async (req, res, next) => {
       title: "The Cipher Heist",
       reportText: "A sequence of encrypted messages led to a data breach.",
       evidenceDescription: "Analyze comms, IP logs, and badge access records.",
-      sqliteTemplateId: "cipher-heist",
-      criminalName: "Arjun Malhotra"
+      sqliteTemplateId: "cipher-heist"
     });
 
     const officer = await Officer.create({
@@ -253,6 +290,91 @@ export const seedDemoData = async (req, res, next) => {
       storyId: story._id,
       officerId: officer._id,
       sqliteTemplateId: story.sqliteTemplateId
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getFastestSolvers = async (req, res, next) => {
+  try {
+    // Find users who have completed the game (completedAt is not null)
+    const completedUsers = await User.find({
+      completedAt: { $ne: null },
+      startedAt: { $ne: null }
+    })
+      .populate("phase2Story", "title")
+      .select("rollNumber displayName phase2Story startedAt completedAt");
+
+    // Calculate completion time and prepare data
+    const solvers = completedUsers
+      .map((user) => {
+        const completionTime = new Date(user.completedAt) - new Date(user.startedAt);
+        return {
+          _id: user._id,
+          rollNumber: user.rollNumber,
+          displayName: user.displayName,
+          storyTitle: user.phase2Story?.title || "Unknown",
+          startedAt: user.startedAt,
+          completedAt: user.completedAt,
+          completionTime: completionTime
+        };
+      })
+      .filter((solver) => solver.completionTime > 0) // Filter out invalid times
+      .sort((a, b) => a.completionTime - b.completionTime); // Sort ascending by completion time
+
+    res.json({ solvers });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getTimerDuration = async (req, res, next) => {
+  try {
+    let config = await GameConfig.findOne({ configKey: "timer-duration" });
+    if (!config) {
+      // Create default config if it doesn't exist
+      config = await GameConfig.create({
+        configKey: "timer-duration",
+        timerDuration: 1800 // Default 30 minutes
+      });
+    }
+    res.json({ timerDuration: config.timerDuration });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const setTimerDuration = async (req, res, next) => {
+  try {
+    const { timerDuration } = req.body || {};
+    if (!timerDuration || timerDuration < 60) {
+      return res.status(400).json({ error: "Timer duration must be at least 60 seconds (1 minute)" });
+    }
+    
+    let config = await GameConfig.findOne({ configKey: "timer-duration" });
+    if (!config) {
+      config = await GameConfig.create({
+        configKey: "timer-duration",
+        timerDuration: timerDuration
+      });
+    } else {
+      config.timerDuration = timerDuration;
+      await config.save();
+    }
+    
+    res.json({ ok: true, timerDuration: config.timerDuration });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteAllUsers = async (req, res, next) => {
+  try {
+    const result = await User.deleteMany({});
+    res.json({ 
+      ok: true, 
+      message: `${result.deletedCount} user records deleted successfully`
     });
   } catch (err) {
     next(err);

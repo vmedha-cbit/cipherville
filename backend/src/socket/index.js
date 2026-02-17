@@ -13,39 +13,6 @@ export const initSocket = (server) => {
   ioInstance = io;
 
   io.on("connection", (socket) => {
-    socket.on("join-room", async ({ roomId, userId }) => {
-      if (!roomId || !userId) return;
-      socket.join(roomId);
-      socketState.set(socket.id, { roomId, userId });
-      socket.to(roomId).emit("user-joined", { userId });
-      await logEvent("socket-join", { roomId, userId });
-    });
-
-    socket.on("phase-update", ({ roomId, phase }) => {
-      if (!roomId) return;
-      socket.to(roomId).emit("phase-update", { phase });
-    });
-
-    socket.on("progress-sync", ({ roomId, payload }) => {
-      if (!roomId) return;
-      socket.to(roomId).emit("progress-sync", payload);
-    });
-
-    socket.on("admin-monitor", ({ roomId }) => {
-      if (!roomId) return;
-      socket.join(`admin-${roomId}`);
-    });
-
-    socket.on("game-start", ({ roomId }) => {
-      if (!roomId) return;
-      io.to(roomId).emit("game-start", { roomId });
-    });
-
-    socket.on("game-end", ({ roomId }) => {
-      if (!roomId) return;
-      io.to(roomId).emit("game-end", { roomId });
-    });
-
     socket.on("disconnect", async () => {
       const meta = socketState.get(socket.id);
       if (meta) {
@@ -59,6 +26,9 @@ export const initSocket = (server) => {
 };
 
 export const emitRoom = (roomId, event, payload) => {
+  // Kept for backward compatibility, but not used in new system
   if (!ioInstance || !roomId) return;
   ioInstance.to(roomId).emit(event, payload);
 };
+
+export const getIO = () => ioInstance;

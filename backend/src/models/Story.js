@@ -6,7 +6,6 @@ const storySchema = new mongoose.Schema(
     description: { type: String, required: true },
     pdfUrl: { type: String },
     sqliteTemplateId: { type: String },
-    criminalName: { type: String, required: true },
     evidenceRecords: [{ type: mongoose.Schema.Types.Mixed }],
     questions: [
       {
@@ -19,3 +18,4 @@ const storySchema = new mongoose.Schema(
 );
 
 export const Story = mongoose.model("Story", storySchema);
+

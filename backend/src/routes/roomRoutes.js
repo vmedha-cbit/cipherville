@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createRoom, listRooms, joinRoom, startRoom, endRoom, setRoomPhase, roomPlayers } from "../controllers/roomController.js";
+import { createRoom, listRooms, joinRoom, startRoom, endRoom, setRoomPhase, roomPlayers, getRoomTimer } from "../controllers/roomController.js";
 import { requireAdmin, requireParticipantSession } from "../middleware/auth.js";
 
 const router = Router();
@@ -11,5 +11,6 @@ router.post("/:roomId/start", requireAdmin, startRoom);
 router.post("/:roomId/end", requireAdmin, endRoom);
 router.post("/:roomId/phase", requireAdmin, setRoomPhase);
 router.get("/:roomId/players", requireAdmin, roomPlayers);
+router.get("/:roomId/timer", requireParticipantSession, getRoomTimer);
 
 export default router;

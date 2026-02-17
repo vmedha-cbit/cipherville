@@ -1,0 +1,78 @@
+SQL MYSTERY GAME - GUIDE 
+HOW TO PLAY
+Read the STORY  - Note dates, times, names, locations
+Use the DATABASE  - Run queries to investigate
+Answer QUESTIONS  - Submit exact values from database results
+
+DATABASE BASICS
+Tables = Organized information folders (employees, logs, records, etc.)
+View any table:
+SELECT * FROM table_name;
+
+See what tables exist: Check the sidebar or run:
+SELECT name FROM sqlite_master WHERE type='table';
+
+
+🔍 ESSENTIAL SQL QUERIES
+Get Specific Data
+SELECT column1, column2 FROM table_name;
+
+Filter Results
+SELECT * FROM table_name WHERE column = 'value';
+SELECT * FROM table_name WHERE number > 100;
+SELECT * FROM table_name WHERE time >= '2026-02-20 23:00:00';
+
+Pattern Matching
+WHERE email LIKE '%@company.com'
+WHERE name LIKE 'John%'
+WHERE text NOT LIKE '%keyword%'
+
+Count Things
+SELECT COUNT(*) FROM table_name;
+SELECT COUNT(DISTINCT column) FROM table_name;
+
+Sort & Limit
+ORDER BY column DESC    -- newest/highest first
+ORDER BY column ASC     -- oldest/lowest first
+LIMIT 1                 -- get only top result
+
+Multiple Conditions
+WHERE condition1 AND condition2
+WHERE condition1 OR condition2
+
+Join Tables
+SELECT t1.name, t2.action
+FROM table1 t1
+JOIN table2 t2 ON t1.id = t2.person_id;
+
+Group & Summarize
+SELECT category, COUNT(*)
+FROM table_name
+GROUP BY category;
+
+Nested Queries
+SELECT name FROM people
+WHERE id = (SELECT person_id FROM logs WHERE action = 'X');
+
+
+🕵️ INVESTIGATION STRATEGY
+Explore tables - See what data exists
+Filter step-by-step - Narrow down results
+Connect information - Join tables when needed
+Verify findings - Run queries multiple times
+Extract exact answer - Copy precise value
+
+ ANSWER FORMAT
+Copy exact value from results
+Match capitalization
+No extra words or punctuation
+Just the value: Engineering not The answer is Engineering
+
+ QUICK TIPS
+Questions get harder as you progress
+Use multiple queries to solve one question
+Check column names with SELECT *
+Break down complex questions into smaller parts
+
+You're ready to investigate! 🔎
+

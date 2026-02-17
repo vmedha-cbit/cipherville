@@ -3,7 +3,7 @@ import api from "../../providers/api.js";
 import AdminNav from "../../components/AdminNav.jsx";
 
 const applyAdminToken = () => {
-  const token = localStorage.getItem("cipherville-admin-token");
+  // Token is managed by api.js, not localStorage
   if (token) {
     api.defaults.headers.Authorization = `Bearer ${token}`;
   }

@@ -34,21 +34,49 @@ export default function Lobby() {
   }, [socket, navigate]);
 
   return (
-    <div className="min-h-screen px-6 py-10">
-      <div className="max-w-3xl mx-auto bg-steel/70 p-8 rounded-xl border border-white/10">
-        <h2 className="text-2xl font-semibold">Lobby</h2>
-        <p className="text-haze mt-2">{status}</p>
-        <form className="mt-6 flex flex-col md:flex-row gap-3" onSubmit={handleJoin}>
-          <input
-            className="flex-1 p-3 bg-ink border border-white/10 rounded"
-            placeholder="Room ID"
-            value={roomId}
-            onChange={(e) => setRoomId(e.target.value)}
-            required
-          />
-          <button className="px-6 py-3 bg-ember text-black font-semibold rounded">Join Room</button>
+    <div className="min-h-screen px-6 py-10 film-grain">
+      <div className="max-w-3xl mx-auto evidence-card p-8 rounded-xl shadow-2xl glow-intense animate-fadeIn">
+        <div className="text-center mb-6">
+          <h2 className="text-4xl font-bold bg-gradient-to-r from-amber-500 to-orange-600 bg-clip-text text-transparent mb-2">
+            Investigation Lobby
+          </h2>
+          <div className="h-1 w-16 bg-gradient-to-r from-transparent via-amber-600 to-transparent mx-auto mb-4"></div>
+        </div>
+        
+        <div className="bg-black/40 p-4 rounded-lg border border-amber-500/30 mb-6">
+          <p className="text-haze text-center">
+            <span className="inline-block mr-2">🔍</span>
+            {status}
+          </p>
+        </div>
+        
+        <form className="mt-6 flex flex-col gap-4" onSubmit={handleJoin}>
+          <div>
+            <label className="text-sm text-amber-400 font-semibold tracking-wide">ROOM CODE</label>
+            <input
+              className="w-full mt-2 p-4 bg-black/60 border-2 border-white/20 rounded-lg text-white font-mono text-xl tracking-wider focus:border-amber-500 focus:ring-2 focus:ring-amber-500/50 outline-none transition-all"
+              placeholder="Enter 6-digit room code"
+              value={roomId}
+              onChange={(e) => setRoomId(e.target.value.toUpperCase())}
+              maxLength={6}
+              required
+            />
+          </div>
+          
+          {error && (
+            <div className="p-3 bg-red-900/30 border border-red-500/50 rounded-lg">
+              <p className="text-red-400 text-sm font-semibold">⚠️ {error}</p>
+            </div>
+          )}
+          
+          <button className="w-full py-4 btn-investigate text-black font-bold text-lg rounded-lg shadow-lg tracking-wide">
+            🚪 JOIN INVESTIGATION ROOM
+          </button>
         </form>
-        {error && <p className="text-ember text-sm mt-3">{error}</p>}
+        
+        <p className="text-center text-haze text-sm mt-6">
+          Wait for the admin to start the game once you've joined
+        </p>
       </div>
     </div>
   );

@@ -4,10 +4,7 @@ import api, { attachSession } from "./api.js";
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [session, setSession] = useState(() => {
-    const raw = localStorage.getItem("cipherville-session");
-    return raw ? JSON.parse(raw) : null;
-  });
+  const [session, setSession] = useState(null);
 
   useEffect(() => {
     if (session?.userId && session?.sessionToken) {
@@ -15,28 +12,26 @@ export const AuthProvider = ({ children }) => {
     }
   }, [session]);
 
-  const login = async (rollNumber, displayName) => {
-    const { data } = await api.post("/auth/participant-login", { rollNumber, displayName });
-    const nextSession = {
-      userId: data.userId,
-      sessionToken: data.sessionToken,
-      rollNumber: data.rollNumber
-    };
-    localStorage.setItem("cipherville-session", JSON.stringify(nextSession));
-    setSession(nextSession);
+  // New login function for backend-driven session
+  const login = async (rollNo, displayName) => {
+    const { data } = await api.post("/auth/participant-login", { rollNo, displayName });
+    // Attach session headers IMMEDIATELY before setting state
+    attachSession(data.userId, data.sessionToken);
+    // Then store both userId and sessionToken
+    setSession({ userId: data.userId, sessionToken: data.sessionToken });
+    return data;
   };
 
   const logout = async () => {
     if (session) {
       await api.post("/auth/participant-logout");
     }
-    localStorage.removeItem("cipherville-session");
     setSession(null);
   };
 
   const updateSession = (patch) => {
+    // Update session state only - NO localStorage
     const next = { ...session, ...patch };
-    localStorage.setItem("cipherville-session", JSON.stringify(next));
     setSession(next);
   };
 

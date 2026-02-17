@@ -1,8 +1,47 @@
+// Update user progress (phase, subphase, lastVisitedRoute, phase1YearRevealed)
+export const updateProgress = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    const { currentPhase, currentSubphase, lastVisitedRoute, phase1YearRevealed, year } = req.body;
+    if (typeof currentPhase === "number") user.currentPhase = currentPhase;
+    if (typeof currentSubphase === "number") user.currentSubphase = currentSubphase;
+    if (typeof lastVisitedRoute === "string") user.lastVisitedRoute = lastVisitedRoute;
+    if (typeof phase1YearRevealed === "boolean") {
+      user.phase1YearRevealed = phase1YearRevealed;
+      if (year) user.phase1Year = year;
+    }
+    await user.save();
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Get user progress (for route protection)
+export const getProgress = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json({
+      currentPhase: user.currentPhase,
+      currentSubphase: user.currentSubphase,
+      lastVisitedRoute: user.lastVisitedRoute,
+      completedAt: user.completedAt,
+      sessionActive: user.sessionActive,
+      phase1YearRevealed: user.phase1YearRevealed,
+      phase1Year: user.phase1Year
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { env } from "../config/env.js";
 import { Admin } from "../models/Admin.js";
 import { User } from "../models/User.js";
+import { GameConfig } from "../models/GameConfig.js";
 import { makeId } from "../utils/id.js";
 import { logEvent } from "../services/logService.js";
 
@@ -16,22 +55,140 @@ const ensureDefaultAdmin = async () => {
 
 export const participantLogin = async (req, res, next) => {
   try {
-    const { rollNumber, displayName } = req.body || {};
-    if (!rollNumber) {
-      return res.status(400).json({ error: "rollNumber is required" });
+    const { rollNo, displayName } = req.body || {};
+    if (!rollNo) {
+      return res.status(400).json({ error: "rollNo is required" });
     }
-    let user = await User.findOne({ rollNumber });
+
+    let user = await User.findOne({ rollNo });
+    const now = new Date();
+    
+    // Generate a session token
+    const sessionToken = jwt.sign({ userId: user?._id || rollNo, ts: now.getTime() }, env.JWT_SECRET, { expiresIn: "6h" });
+
+    // Step 2: If user does NOT exist
     if (!user) {
-      user = await User.create({ rollNumber, displayName });
+      user = await User.create({
+        rollNo,
+        displayName,
+        sessionActive: true,
+        activeSession: sessionToken,
+        startedAt: now,
+        gameStartedAt: now,
+        timerDuration: 1800,
+        gameStatus: "playing",
+        completedAt: null,
+        currentPhase: 1,
+        currentSubphase: 1,
+        lastVisitedRoute: "/officer"
+      });
+      
+      // Assign officer immediately after creating user
+      const { Officer } = await import("../models/Officer.js");
+      const { GameState } = await import("../models/GameState.js");
+      const officers = await Officer.find();
+      if (officers.length > 0) {
+        const picked = officers[Math.floor(Math.random() * officers.length)];
+        user.assignedOfficer = picked._id;
+      }
+      
+      await user.save();
+      
+      // Initialize GameState for timer
+      await GameState.findOneAndUpdate(
+        { userId: user._id },
+        {
+          userId: user._id,
+          status: "started",
+          startTime: now,
+          duration: 1800
+        },
+        { upsert: true, new: true }
+      );
+      
+      return res.json({
+        status: "new-session",
+        userId: user._id,
+        sessionToken,
+        lastVisitedRoute: "/officer"
+      });
     }
-    if (user.activeSession) {
-      return res.status(409).json({ error: "Active session exists" });
+
+    // Step 3: If user exists AND completedAt is NOT null
+    if (user.completedAt) {
+      return res.status(403).json({
+        status: "completed",
+        error: "Game already completed. Re-entry not allowed."
+      });
     }
-    const sessionToken = makeId(24);
-    user.activeSession = sessionToken;
+
+    // Step 4: If user exists AND sessionActive = true
+    if (user.sessionActive) {
+      // Ensure officer is assigned
+      if (!user.assignedOfficer) {
+        const { Officer } = await import("../models/Officer.js");
+        const officers = await Officer.find();
+        if (officers.length > 0) {
+          const picked = officers[Math.floor(Math.random() * officers.length)];
+          user.assignedOfficer = picked._id;
+        }
+      }
+      
+      // Generate new session token
+      const newSessionToken = jwt.sign({ userId: user._id, ts: now.getTime() }, env.JWT_SECRET, { expiresIn: "6h" });
+      user.activeSession = newSessionToken;
+      await user.save();
+      return res.json({
+        status: "resume-session",
+        userId: user._id,
+        sessionToken: newSessionToken,
+        lastVisitedRoute: user.lastVisitedRoute || "/officer"
+      });
+    }
+
+    // Step 5: If user exists AND sessionActive = false AND completedAt is null
+    const newSessionToken = jwt.sign({ userId: user._id, ts: now.getTime() }, env.JWT_SECRET, { expiresIn: "6h" });
+    
+    // Ensure officer is assigned
+    if (!user.assignedOfficer) {
+      const { Officer } = await import("../models/Officer.js");
+      const officers = await Officer.find();
+      if (officers.length > 0) {
+        const picked = officers[Math.floor(Math.random() * officers.length)];
+        user.assignedOfficer = picked._id;
+      }
+    }
+    
+    user.sessionActive = true;
+    user.activeSession = newSessionToken;
+    user.startedAt = now;
+    user.gameStartedAt = now;
+    user.timerDuration = 1800;
+    user.gameStatus = "playing";
+    user.currentPhase = 1;
+    user.currentSubphase = 1;
+    user.lastVisitedRoute = "/officer";
     await user.save();
-    await logEvent("participant-login", { userId: user._id });
-    res.json({ userId: user._id, sessionToken, rollNumber: user.rollNumber });
+    
+    // Initialize GameState for timer
+    const { GameState } = await import("../models/GameState.js");
+    await GameState.findOneAndUpdate(
+      { userId: user._id },
+      {
+        userId: user._id,
+        status: "started",
+        startTime: now,
+        duration: 1800
+      },
+      { upsert: true, new: true }
+    );
+    
+    return res.json({
+      status: "new-session",
+      userId: user._id,
+      sessionToken: newSessionToken,
+      lastVisitedRoute: "/officer"
+    });
   } catch (err) {
     next(err);
   }

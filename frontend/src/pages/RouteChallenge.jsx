@@ -6,13 +6,12 @@ export default function RouteChallenge() {
   const [searchParams] = useSearchParams();
   const isCorrectRoute = searchParams.get("isCorrect") === "true";
   const routeId = searchParams.get("routeId");
-  const jumbledWord = searchParams.get("jumbled");
   const correctAnswer = searchParams.get("answer");
   const year = searchParams.get("year");
 
   const [userAnswer, setUserAnswer] = useState("");
-  const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
 
   const handleAnswerSubmit = (e) => {
     e.preventDefault();
@@ -22,67 +21,77 @@ export default function RouteChallenge() {
     const normalizedUserAnswer = userAnswer.toLowerCase().trim();
     const normalizedCorrectAnswer = (correctAnswer || "").toLowerCase().trim();
     
-    // The answer should match the correct unscrambled word (e.g., "STATION")
-    const answerIsCorrect = normalizedUserAnswer === normalizedCorrectAnswer;
+    // The answer should match the correct unscrambled word
+    const isAnswerCorrect = normalizedUserAnswer === normalizedCorrectAnswer;
 
-    if (answerIsCorrect && isCorrectRoute) {
-      // Correct answer on correct route - show year reveal
-      setTimeout(() => {
-        navigate("/year-reveal", { state: { year } });
-      }, 1500);
+    if (!isAnswerCorrect) {
+      setError("Incorrect answer. Try again.");
+      setSubmitted(false);
+      return;
+    }
+
+    // Correct answer - navigate immediately
+    if (isCorrectRoute) {
+      navigate("/year-reveal", { state: { year } });
     } else {
-      // Wrong answer OR correct answer but wrong route - dead end
-      setTimeout(() => {
-        navigate("/route-fail", { state: { routeId, reason: answerIsCorrect ? "wrong-route" : "wrong-answer" } });
-      }, 1500);
+      navigate("/route-fail", { state: { routeId, reason: "wrong-route" } });
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center px-6">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-xl p-8">
-        <form onSubmit={handleAnswerSubmit}>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Route {routeId}: Challenge</h2>
-          <p className="text-gray-600 mb-6">Enter the unscrambled SQL word you discovered earlier</p>
-          
-          {/* Input for Answer - No jumbled word shown */}
-          <label className="block text-sm font-medium text-gray-700 mb-3">
-            Enter your answer:
-          </label>
-          <input
-            type="text"
-            className="w-full p-4 border-2 border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg text-gray-900"
-            placeholder="Type the unscrambled word..."
-            value={userAnswer}
-            onChange={(e) => setUserAnswer(e.target.value)}
-            required
-            disabled={submitted}
-            autoFocus
-          />
-
-          {/* Error Message */}
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-              <p className="text-sm">⚠️ {error}</p>
+    <div className="min-h-screen relative">
+      <div className="film-grain" />
+      <div className="min-h-screen px-6 py-10 flex items-center justify-center">
+        <div className="max-w-2xl w-full evidence-card p-8">
+          <form onSubmit={handleAnswerSubmit} className="space-y-6">
+            <div className="text-center mb-8">
+              <h2 className="text-4xl font-bold bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600 bg-clip-text text-transparent mb-4">
+                Route {routeId}: Secure Access
+              </h2>
+              <p className="text-haze">To access this route's information, enter the unscrambled word:</p>
             </div>
-          )}
 
-          {/* Success Message */}
-          {submitted && !error && (
-            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-              <p className="text-sm font-semibold">✓ Verifying... Please wait</p>
+            {/* Answer Input */}
+            <div className="space-y-3">
+              <label className="block text-sm font-semibold text-amber-400 text-center">
+                Unscrambled Word:
+              </label>
+              <input
+                type="text"
+                className="w-full p-4 bg-ink/70 border-2 border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-ember focus:border-ember text-white placeholder-haze text-center text-2xl font-mono tracking-wider uppercase"
+                placeholder="TYPE HERE..."
+                value={userAnswer}
+                onChange={(e) => setUserAnswer(e.target.value.toUpperCase())}
+                required
+                disabled={submitted}
+                autoFocus
+              />
             </div>
-          )}
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={submitted}
-            className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
-          >
-            {submitted ? "Checking..." : "Submit"}
-          </button>
-        </form>
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-900/30 border border-red-500/50 text-red-300 p-4 rounded-lg text-center">
+                <p className="text-sm font-semibold">❌ {error}</p>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={submitted}
+              className="w-full py-3 btn-investigate bg-amber-600 hover:bg-amber-700 disabled:opacity-40 disabled:cursor-not-allowed transition font-semibold text-lg"
+            >
+              {submitted ? "Verifying..." : "Submit Answer"}
+            </button>
+          </form>
+
+          {/* Hint */}
+          <div className="mt-8 pt-8 border-t border-white/10">
+            <p className="text-haze text-sm text-center">
+              💡 This is where the correct answer truly matters. Get it right to access the route's secrets.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

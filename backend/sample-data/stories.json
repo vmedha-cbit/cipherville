@@ -3,7 +3,6 @@
     "title": "The Cipher Heist",
     "reportText": "A sequence of encrypted messages led to a data breach.",
     "evidenceDescription": "Analyze comms, IP logs, and badge access records.",
-    "sqliteTemplateId": "cipher-heist",
-    "criminalName": "Arjun Malhotra"
+    "sqliteTemplateId": "cipher-heist"
   }
 ]

@@ -3,7 +3,7 @@ import api from "../../providers/api.js";
 import AdminNav from "../../components/AdminNav.jsx";
 
 const applyAdminToken = () => {
-  const token = localStorage.getItem("cipherville-admin-token");
+  // Token is managed by api.js, not localStorage
   if (token) {
     api.defaults.headers.Authorization = `Bearer ${token}`;
   }
@@ -11,7 +11,7 @@ const applyAdminToken = () => {
 
 export default function StoryManagement() {
   const [stories, setStories] = useState([]);
-  const [form, setForm] = useState({ title: "", description: "", sqliteTemplateId: "", criminalName: "" });
+  const [form, setForm] = useState({ title: "", description: "", sqliteTemplateId: "" });
   const [questionForms, setQuestionForms] = useState({});
   const [bulkJsons, setBulkJsons] = useState({});
 
@@ -29,7 +29,7 @@ export default function StoryManagement() {
     e.preventDefault();
     applyAdminToken();
     await api.post("/stories", form);
-    setForm({ title: "", description: "", sqliteTemplateId: "", criminalName: "" });
+    setForm({ title: "", description: "", sqliteTemplateId: "" });
     load();
   };
 
@@ -92,7 +92,6 @@ export default function StoryManagement() {
         <form className="bg-steel/70 p-4 rounded border border-white/10 grid md:grid-cols-2 gap-3" onSubmit={createStory}>
           <input className="p-2 bg-ink border border-white/10 rounded text-white" placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
           <input className="p-2 bg-ink border border-white/10 rounded text-white" placeholder="SQLite Template ID" value={form.sqliteTemplateId} onChange={(e) => setForm({ ...form, sqliteTemplateId: e.target.value })} />
-          <input className="p-2 bg-ink border border-white/10 rounded text-white" placeholder="Criminal Name" value={form.criminalName} onChange={(e) => setForm({ ...form, criminalName: e.target.value })} required />
           <textarea className="p-2 bg-ink border border-white/10 rounded md:col-span-2 text-white" placeholder="Case Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required />
           <button className="px-4 py-2 bg-ember text-black font-semibold rounded">Create</button>
         </form>
@@ -103,7 +102,7 @@ export default function StoryManagement() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-semibold">{story.title}</p>
-                  <p className="text-haze text-sm">Criminal: {story.criminalName}</p>
+                  <p className="text-haze text-sm">{story.description}</p>
                 </div>
                 <button
                   className="px-3 py-1 bg-red-600 text-white text-sm rounded"

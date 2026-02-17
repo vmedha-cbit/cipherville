@@ -1,4 +1,6 @@
+import { assignStoryFairly } from "./storyAllocation.js";
 import { Officer } from "../models/Officer.js";
+import { Story } from "../models/Story.js";
 import { User } from "../models/User.js";
 
 export const assignOfficerToUser = async (userId, roomId) => {
@@ -25,4 +27,19 @@ export const assignOfficerToUser = async (userId, roomId) => {
   user.assignedOfficer = picked._id;
   await user.save();
   return user;
+};
+
+export const assignStoryToUser = async (userId) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new Error("User not found");
+  }
+  
+  // Use fair round-robin allocation system
+  const assignedStory = await assignStoryFairly();
+  
+  user.phase2Story = assignedStory._id;
+  await user.save();
+  
+  return assignedStory;
 };

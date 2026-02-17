@@ -1,8 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../providers/api.js";
 import { getPuzzleConfig } from "../data/puzzleConfigs.js";
+import { useTimer } from "../providers/timerContext.jsx";
 
 export default function Phase1() {
+	const navigate = useNavigate();
+	const { timeRemaining, getElapsedTime, isExpired } = useTimer();
 	const [officer, setOfficer] = useState(null);
 	const [currentSubphase, setCurrentSubphase] = useState(0);
 	const [phase1Complete, setPhase1Complete] = useState(false);
@@ -27,51 +31,30 @@ export default function Phase1() {
 	const [yearRevealed, setYearRevealed] = useState(false);
 	const [shuffledRoutes, setShuffledRoutes] = useState([]);
 
-	// Load saved progress from localStorage on mount
-	useEffect(() => {
-		const savedProgress = localStorage.getItem("phase1Progress");
-		if (savedProgress) {
-			try {
-				const progress = JSON.parse(savedProgress);
-				if (progress.currentSubphase !== undefined) setCurrentSubphase(progress.currentSubphase);
-				if (progress.ddCorrect) setDdCorrect(progress.ddCorrect);
-				if (progress.puzzleSuccess) setPuzzleSuccess(progress.puzzleSuccess);
-				if (progress.yearRevealed) setYearRevealed(progress.yearRevealed);
-			} catch (e) {
-				console.error("Failed to load saved progress", e);
-			}
-		}
-	}, []);
-
-	// Save progress to localStorage whenever key states change
-	useEffect(() => {
-		const progress = {
-			currentSubphase,
-			ddCorrect,
-			puzzleSuccess,
-			yearRevealed
-		};
-		localStorage.setItem("phase1Progress", JSON.stringify(progress));
-	}, [currentSubphase, ddCorrect, puzzleSuccess, yearRevealed]);
-
 	useEffect(() => {
 		const load = async () => {
 			const { data } = await api.get("/participants/phase1-story");
 			setOfficer(data.officer);
-			
+			// Update backend progress: phase 1, subphase 1, lastVisitedRoute
+			await api.post("/participants/progress/update", {
+				currentPhase: 1,
+				currentSubphase: 1,
+				lastVisitedRoute: "/phase1"
+			});
+			// ...existing code...
 			// Initialize QR codes (1 correct + 9 fake, shuffled)
 			const codes = [
 				{ src: "/qr/CorrectQr.png", isCorrect: true },
 				...Array.from({ length: 9 }).map(() => ({ src: "/qr/DummyQr.png", isCorrect: false }))
 			];
 			setQrCodes(codes.sort(() => Math.random() - 0.5));
-			
+			// ...existing code...
 			// Initialize puzzle config using officer's puzzle folder
 			const puzzleFolder = data.officer?.puzzleFolder || "puzzle1";
 			setPuzzleFolder(puzzleFolder);
 			const config = getPuzzleConfig(puzzleFolder);
 			setPuzzleConfig(config);
-			
+			// ...existing code...
 			// Initialize grid state
 			const initialState = {};
 			config.layout.forEach((fileName, index) => {
@@ -80,7 +63,7 @@ export default function Phase1() {
 				}
 			});
 			setGridState(initialState);
-			
+			// ...existing code...
 			// Shuffle route options for randomized correct route position
 			if (data.officer?.routeOptions) {
 				const shuffled = [...data.officer.routeOptions].sort(() => Math.random() - 0.5);
@@ -98,6 +81,19 @@ export default function Phase1() {
 		return available.sort(() => Math.random() - 0.5);
 	};
 
+	// Save progress helper
+	const saveProgressToBackend = async (subphase) => {
+		try {
+			await api.post("/participants/save-progress", {
+				subphase,
+				timeRemaining: timeRemaining || 0,
+				timeElapsed: getElapsedTime()
+			});
+		} catch (err) {
+			console.error("Failed to save progress:", err);
+		}
+	};
+
 	const handleDDValidation = () => {
 		if (!officer) return;
 		setDdError("");
@@ -111,6 +107,7 @@ export default function Phase1() {
 		
 		if (inputDD === correctDD) {
 			setDdCorrect(true);
+			saveProgressToBackend("phase1-subphase1-dd");
 		} else {
 			setDdError(`Incorrect DD. Try again. (Hint: Check the article carefully)`);
 			setDdInput("");
@@ -163,6 +160,7 @@ export default function Phase1() {
 			});
 			if (data.ok) {
 				setPuzzleSuccess(true);
+				saveProgressToBackend("phase1-subphase2-puzzle");
 				// Show original image after 1 second delay
 				setTimeout(() => {
 					setShowOriginalImage(true);
@@ -183,93 +181,132 @@ export default function Phase1() {
 			setCurrentSubphase(currentSubphase + 1);
 		} else if (currentSubphase === 2 && isSubphase3Complete) {
 			setPhase1Complete(true);
-			// Clear saved progress when phase 1 completes
-			localStorage.removeItem("phase1Progress");
 		}
 	};
 	
-	// Listen for year reveal from the YearReveal page (via storage event or manual trigger)
+	// Poll backend progress to check if year has been revealed (every 2 seconds)
 	useEffect(() => {
-		const handleStorageChange = (e) => {
-			if (e.key === "phase1YearRevealed" && e.newValue === "true") {
-				setYearRevealed(true);
-				localStorage.removeItem("phase1YearRevealed");
+		const pollProgress = async () => {
+			try {
+				const { data } = await api.get("/participants/progress");
+				if (data.phase1YearRevealed && !yearRevealed) {
+					setYearRevealed(true);
+					saveProgressToBackend("phase1-subphase3-year");
+				}
+			} catch (err) {
+				console.error("Failed to check progress", err);
 			}
 		};
-		window.addEventListener("storage", handleStorageChange);
 		
-		// Also check on interval (for same-tab detection)
-		const interval = setInterval(() => {
-			const revealed = localStorage.getItem("phase1YearRevealed");
-			if (revealed === "true") {
-				setYearRevealed(true);
-				localStorage.removeItem("phase1YearRevealed");
-			}
-		}, 1000);
-		
-		return () => {
-			window.removeEventListener("storage", handleStorageChange);
-			clearInterval(interval);
-		};
-	}, []);
+		const interval = setInterval(pollProgress, 2000);
+		return () => clearInterval(interval);
+	}, [yearRevealed]);
+
+	// Handle phase 1 completion - navigate to db-login
+	useEffect(() => {
+		if (phase1Complete) {
+			// Save final progress before navigating
+			const redirect = setTimeout(() => {
+				navigate("/db-login");
+			}, 1000);
+			return () => clearTimeout(redirect);
+		}
+	}, [phase1Complete, navigate]);
+
+	// Handle timeout - save progress
+	useEffect(() => {
+		if (isExpired) {
+			// Game will auto-redirect via GameOverModal
+			const saveTimeout = async () => {
+				try {
+					await api.post("/participants/end-game", { reason: "timeout" });
+				} catch (err) {
+					console.error("Failed to end game:", err);
+				}
+			};
+			saveTimeout();
+		}
+	}, [isExpired]);
 
 	return (
-		<div className="min-h-screen px-6 py-10 bg-black">
-			<div className="max-w-4xl mx-auto space-y-8">
-				{phase1Complete ? (
-					<div className="bg-steel/70 p-8 rounded-xl border border-white/10 text-center">
-						<h2 className="text-3xl font-bold text-green-400 mb-4">Phase 1 Complete</h2>
-						<p className="text-haze mb-2">You discovered the officer's date of birth.</p>
-						<p className="text-haze">Return to the Database Login tab and enter DDMMYYYY.</p>
-					</div>
-				) : (
-					<>
-						<div className="bg-steel/70 p-6 rounded-xl border border-white/10">
-							<h2 className="text-2xl font-semibold">Officer Info Access</h2>
-							<p className="text-haze mt-2">Complete all three sub-phases, then return to the DB login tab.</p>
+		<div className="min-h-screen relative">
+			<div className="film-grain" />
+			
+			{/* Timer Display */}
+			<div className="fixed top-6 right-6 z-50">
+				<div className={`px-6 py-3 rounded-lg font-mono text-xl font-bold ${
+					timeRemaining > 0 ? 'bg-green-900/60 text-green-300' : 'bg-red-900/60 text-red-300'
+				} border ${timeRemaining > 0 ? 'border-green-500/50' : 'border-red-500/50'}`}>
+					{Math.floor(timeRemaining / 3600).toString().padStart(2, '0')}:{Math.floor((timeRemaining % 3600) / 60).toString().padStart(2, '0')}:{(timeRemaining % 60).toString().padStart(2, '0')}
+				</div>
+			</div>
+
+			<div className="min-h-screen px-6 py-10">
+				<div className="max-w-4xl mx-auto space-y-8">
+					{phase1Complete ? (
+						<div className="evidence-card p-8 text-center">
+							<h2 className="text-3xl font-bold text-green-400 mb-4">Phase 1 Complete</h2>
+							<p className="text-haze mb-2">You discovered the officer's date of birth.</p>
+							<p className="text-haze">Return to the Database Login tab and enter DDMMYYYY.</p>
 						</div>
+					) : (
+						<>
+							<div className="evidence-card p-6">
+								<h2 className="text-2xl font-semibold bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600 bg-clip-text text-transparent">
+									Officer Info Access
+								</h2>
+								<p className="text-haze mt-2">Complete all three sub-phases, then return to the DB login tab.</p>
+							</div>
 
-						<div className="flex gap-2 justify-center">
-							{[0, 1, 2].map((num) => (
-								<div
-									key={num}
-									className={`w-3 h-3 rounded-full ${currentSubphase >= num ? "bg-ember" : "bg-white/20"}`}
-								/>
-							))}
-						</div>
-
-						{currentSubphase === 0 && (
-							<div className="bg-steel/70 p-8 rounded-xl border border-white/10">
-								<h2 className="text-2xl font-semibold mb-2">Sub-phase 1: Reveal the Day (DD)</h2>
-								<p className="text-haze mb-6">Scan the QR codes with your phone to find the news article that reveals the day.</p>
-
-							<div className="grid grid-cols-5 gap-4 mb-8">
-								{qrCodes.map((qr, idx) => (
+							<div className="flex gap-2 justify-center">
+								{[0, 1, 2].map((num) => (
 									<div
-										key={idx}
-										className="aspect-square bg-white p-2 rounded flex items-center justify-center"
-									>
-										<img src={qr.src} alt={`QR ${idx + 1}`} className="w-full h-full object-contain" />
-									</div>
+										key={num}
+										className={`w-3 h-3 rounded-full ${currentSubphase >= num ? "bg-amber-500" : "bg-white/20"}`}
+									/>
 								))}
 							</div>
 
-							{/* DD Input Section */}
-							<div className="bg-ink/50 border border-white/20 p-6 rounded mb-6">
-								<p className="text-white font-semibold mb-4">📅 Enter the DD (Day) you found:</p>
-								<div className="flex gap-3">
-									<input
-										type="text"
-										maxLength="2"
-										placeholder="e.g., 15"
-										value={ddInput}
-										onChange={(e) => setDdInput(e.target.value.replace(/\D/g, ""))}
-										onKeyPress={(e) => e.key === "Enter" && handleDDValidation()}
-										className="px-4 py-2 bg-black border border-white/30 rounded text-white text-center text-2xl font-bold tracking-widest w-24"
-										disabled={ddCorrect}
-									/>
-									<button
-										onClick={handleDDValidation}
+							{currentSubphase === 0 && (
+								<div className="evidence-card p-8">
+									<h2 className="text-2xl font-semibold mb-2">Sub-phase 1: Reveal the Day (DD)</h2>
+									<p className="text-haze mb-6">Scan the QR codes with your phone to find the news article that reveals the day.</p>
+
+									{/* Fallback for missing officer or QR codes */}
+									{!officer && (
+										<div className="text-red-400 font-bold mb-4">Officer info not loaded. Please refresh or check backend.</div>
+									)}
+									{qrCodes.length === 0 && (
+										<div className="text-red-400 font-bold mb-4">QR codes not loaded. Please check /public/qr/CorrectQr.png and DummyQr.png.</div>
+									)}
+
+									<div className="grid grid-cols-5 gap-4 mb-8">
+										{qrCodes.map((qr, idx) => (
+											<div
+												key={idx}
+												className="aspect-square bg-white p-2 rounded flex items-center justify-center"
+											>
+												<img src={qr.src} alt={`QR ${idx + 1}`} className="w-full h-full object-contain" />
+											</div>
+										))}
+									</div>
+
+									{/* DD Input Section */}
+									<div className="bg-ink/50 border border-white/20 p-6 rounded mb-6">
+										<p className="text-white font-semibold mb-4">📅 Enter the DD (Day) you found:</p>
+										<div className="flex gap-3">
+											<input
+												type="text"
+												maxLength="2"
+												placeholder="e.g., 15"
+												value={ddInput}
+												onChange={(e) => setDdInput(e.target.value.replace(/\D/g, ""))}
+												onKeyPress={(e) => e.key === "Enter" && handleDDValidation()}
+												className="px-4 py-2 bg-black border border-white/30 rounded text-white text-center text-2xl font-bold tracking-widest w-24"
+												disabled={ddCorrect}
+											/>
+											<button
+												onClick={handleDDValidation}
 										disabled={ddCorrect}
 										className="px-6 py-2 bg-amber-600 text-white font-semibold rounded hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
 									>
@@ -294,7 +331,7 @@ export default function Phase1() {
 								<button
 									onClick={handleNext}
 									disabled={!ddCorrect}
-									className="px-6 py-3 bg-ember text-black font-semibold rounded hover:bg-ember/90 disabled:opacity-40 disabled:cursor-not-allowed transition"
+									className="btn-investigate px-6 py-3 disabled:opacity-40 disabled:cursor-not-allowed"
 								>
 									Next
 								</button>
@@ -303,7 +340,7 @@ export default function Phase1() {
 					)}
 
 					{currentSubphase === 1 && puzzleConfig && (
-						<div className="bg-steel/70 p-8 rounded-xl border border-white/10">
+						<div className="evidence-card p-8">
 							<h2 className="text-2xl font-semibold mb-2">Sub-phase 2: Assemble Evidence (MM)</h2>
 								<p className="text-haze mb-6">Click on empty slots to select them, then click on puzzle pieces to place them in the grid.</p>
 
@@ -428,7 +465,7 @@ export default function Phase1() {
 									<button
 										onClick={handleNext}
 										disabled={!isSubphase2Complete}
-										className="px-6 py-3 bg-ember text-black font-semibold rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-ember/90 transition"
+										className="btn-investigate px-6 py-3 disabled:opacity-40 disabled:cursor-not-allowed"
 									>
 										Next
 									</button>
@@ -437,7 +474,7 @@ export default function Phase1() {
 						)}
 
 						{currentSubphase === 2 && officer && (
-							<div className="bg-steel/70 p-8 rounded-xl border border-white/10">
+							<div className="evidence-card p-8">
 								<h2 className="text-2xl font-semibold mb-2">Sub-phase 3: Reveal the Year (YYYY)</h2>
 								<p className="text-haze mb-8">Investigate the routes below to find the correct one. Unscramble the word and answer correctly to reveal the year.</p>
 
@@ -502,7 +539,7 @@ export default function Phase1() {
 									<button
 										onClick={handleNext}
 										disabled={!yearRevealed}
-										className="px-6 py-3 bg-emerald-600 text-white font-semibold rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-emerald-700 transition"
+										className="btn-investigate px-6 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed"
 									>
 										Complete Phase 1
 									</button>
@@ -512,6 +549,7 @@ export default function Phase1() {
 					</>
 				)}
 			</div>
+		</div>
 		</div>
 	);
 }
