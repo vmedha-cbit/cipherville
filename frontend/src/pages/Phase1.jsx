@@ -230,55 +230,68 @@ export default function Phase1() {
 	}, [isExpired]);
 
 	return (
-		<div className="min-h-screen relative">
-			<div className="film-grain" />
+		<div className="min-h-screen relative overflow-hidden bg-background">
+			<div className="absolute inset-0 z-0 opacity-10 fingerprint-bg" />
+			<div className="absolute inset-0 z-0 grid-overlay opacity-20"></div>
 			
-      <TimerDisplay />
-
-			<div className="min-h-screen px-6 py-10">
+			<div className="min-h-screen px-6 py-10 relative z-10">
 				<div className="max-w-4xl mx-auto space-y-8">
 					{phase1Complete ? (
-						<div className="evidence-card p-8 text-center">
-							<h2 className="text-3xl font-bold text-green-400 mb-4">Phase 1 Complete</h2>
-							<p className="text-haze mb-2">You discovered the officer's date of birth.</p>
-							<p className="text-haze">Return to the Database Login tab and enter DDMMYYYY.</p>
+						<div className="bg-card border border-primary/50 p-8 text-center rounded-xl shadow-[0_0_50px_rgba(0,245,255,0.2)] animate-fadeIn">
+							<h2 className="text-3xl font-bold text-secondary mb-4 tracking-wider">PHASE 1 COMPLETE</h2>
+							<div className="h-1 w-20 bg-secondary mx-auto mb-6 rounded-full"></div>
+							<p className="text-muted-foreground mb-2 font-mono">OFFICER DATE OF BIRTH ACQUIRED.</p>
+							<p className="text-primary font-bold animate-pulse">RETURN TO DATABASE LOGIN AND ENTER DDMMYYYY.</p>
 						</div>
 					) : (
 						<>
-							<div className="evidence-card p-6">
-								<h2 className="text-2xl font-semibold bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600 bg-clip-text text-transparent">
-									Officer Info Access
+							<div className="bg-card border border-border p-6 rounded-xl shadow-lg relative overflow-hidden">
+								<div className="absolute top-0 left-0 w-1 h-full bg-primary"></div>
+								<h2 className="text-2xl font-bold text-foreground flex items-center gap-3">
+									<span className="text-primary">OFFICER</span> INFO ACCESS
 								</h2>
-								<p className="text-haze mt-2">Complete all three sub-phases, then return to the DB login tab.</p>
+								<p className="text-muted-foreground mt-2 font-mono text-sm">COMPLETE ALL SUB-PROTOCOLS TO PROCEED.</p>
 							</div>
 
-							<div className="flex gap-2 justify-center">
+							<div className="flex gap-4 justify-center items-center">
 								{[0, 1, 2].map((num) => (
 									<div
 										key={num}
-										className={`w-3 h-3 rounded-full ${currentSubphase >= num ? "bg-amber-500" : "bg-white/20"}`}
-									/>
+										className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300 font-bold ${
+											currentSubphase >= num 
+												? "border-primary bg-primary text-primary-foreground shadow-[0_0_15px_rgba(255,59,59,0.5)]" 
+												: "border-muted-foreground/30 bg-muted/20 text-muted-foreground"
+										}`}
+									>
+										{num + 1}
+									</div>
 								))}
 							</div>
 
 							{currentSubphase === 0 && (
-								<div className="evidence-card p-8">
-									<h2 className="text-2xl font-semibold mb-2">Sub-phase 1: Reveal the Day (DD)</h2>
-									<p className="text-haze mb-6">Scan the QR codes with your phone to find the news article that reveals the day.</p>
+								<div className="bg-card border border-border p-8 rounded-xl shadow-md animate-fadeIn">
+									<h2 className="text-2xl font-bold mb-2 text-primary">PROTOCOL 1: REVEAL DAY (DD)</h2>
+									<p className="text-muted-foreground mb-6 font-mono text-sm border-l-2 border-secondary/50 pl-4">
+										SCAN QR CODES TO LOCATE THE ARCHIVED ARTICLE. IDENTIFY THE DAY OF BIRTH.
+									</p>
 
 									{/* Fallback for missing officer or QR codes */}
 									{!officer && (
-										<div className="text-red-400 font-bold mb-4">Officer info not loaded. Please refresh or check backend.</div>
+										<div className="p-4 bg-destructive/10 border border-destructive text-destructive font-bold mb-4 rounded">
+											⚠ CRITICAL: OFFICER DATA CORRUPTED. REFRESH SYSTEM.
+										</div>
 									)}
 									{qrCodes.length === 0 && (
-										<div className="text-red-400 font-bold mb-4">QR codes not loaded. Please check /public/qr/CorrectQr.png and DummyQr.png.</div>
+										<div className="p-4 bg-destructive/10 border border-destructive text-destructive font-bold mb-4 rounded">
+											⚠ CRITICAL: QR DATA MISSING. CHECK ASSETS.
+										</div>
 									)}
 
 									<div className="grid grid-cols-5 gap-4 mb-8">
 										{qrCodes.map((qr, idx) => (
 											<div
 												key={idx}
-												className="aspect-square bg-white p-2 rounded flex items-center justify-center"
+												className="aspect-square bg-white p-2 rounded flex items-center justify-center hover:scale-105 transition-transform duration-300 shadow-lg"
 											>
 												<img src={qr.src} alt={`QR ${idx + 1}`} className="w-full h-full object-contain" />
 											</div>
@@ -286,264 +299,279 @@ export default function Phase1() {
 									</div>
 
 									{/* DD Input Section */}
-									<div className="bg-ink/50 border border-white/20 p-6 rounded mb-6">
-										<p className="text-white font-semibold mb-4">📅 Enter the DD (Day) you found:</p>
+									<div className="bg-muted/30 border border-white/10 p-6 rounded-lg mb-6 backdrop-blur-sm">
+										<p className="text-foreground font-bold mb-4 flex items-center gap-2">
+											<span className="text-secondary">📅</span> INPUT RETRIEVED DATA (DD):
+										</p>
 										<div className="flex gap-3">
 											<input
 												type="text"
 												maxLength="2"
-												placeholder="e.g., 15"
+												placeholder="DD"
 												value={ddInput}
 												onChange={(e) => setDdInput(e.target.value.replace(/\D/g, ""))}
 												onKeyPress={(e) => e.key === "Enter" && handleDDValidation()}
-												className="px-4 py-2 bg-black border border-white/30 rounded text-white text-center text-2xl font-bold tracking-widest w-24"
+												className="px-4 py-3 bg-background border border-border rounded text-primary text-center text-2xl font-bold tracking-widest w-24 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
 												disabled={ddCorrect}
 											/>
 											<button
 												onClick={handleDDValidation}
-										disabled={ddCorrect}
-										className="px-6 py-2 bg-amber-600 text-white font-semibold rounded hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
-									>
-										Validate
-									</button>
+												disabled={ddCorrect}
+												className="px-6 py-2 bg-primary text-primary-foreground font-bold rounded hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition uppercase tracking-wider"
+											>
+												VALIDATE
+											</button>
+										</div>
+								
+										{ddError && (
+											<p className="text-destructive text-sm mt-3 font-mono">❌ {ddError}</p>
+										)}
+										
+										{ddCorrect && (
+											<div className="mt-3 p-3 bg-green-500/10 border border-green-500/30 rounded">
+												<p className="text-green-400 text-sm font-bold">✓ DATA VERIFIED. PROCEED.</p>
+											</div>
+										)}
+									</div>
+
+									<div className="bg-secondary/5 border border-secondary/20 p-4 rounded mb-6">
+										<p className="text-secondary text-xs font-mono">
+											<span className="font-bold">TIP:</span> SCAN QR CODES WITH EXTERNAL DEVICE. LOCATE "DD" IN ARTICLE CONTENT.
+										</p>
+									</div>
+
+									<div className="flex justify-end">
+										<button
+											onClick={handleNext}
+											disabled={!ddCorrect}
+											className="px-8 py-3 bg-secondary text-secondary-foreground font-bold rounded hover:bg-secondary/90 disabled:opacity-40 disabled:cursor-not-allowed uppercase tracking-widest transition-all shadow-lg shadow-secondary/20"
+										>
+											NEXT PROTOCOL
+										</button>
+									</div>
 								</div>
-								
-								{ddError && (
-									<p className="text-ember text-sm mt-3">❌ {ddError}</p>
-								)}
-								
-								{ddCorrect && (
-									<p className="text-green-400 text-sm mt-3">✓ Correct! You found the Day.</p>
-								)}
-							</div>
+							)}
 
-							<div className="bg-ink/50 border border-white/20 p-4 rounded mb-6">
-								<p className="text-haze text-sm">💡 Tip: Scan each QR code with your phone camera to find the article that contains the day (DD) of birth.</p>
-							</div>
+							{currentSubphase === 1 && puzzleConfig && (
+								<div className="bg-card border border-border p-8 rounded-xl shadow-md animate-fadeIn">
+									<h2 className="text-2xl font-bold mb-2 text-primary">PROTOCOL 2: EVIDENCE ASSEMBLY (MM)</h2>
+									<p className="text-muted-foreground mb-6 font-mono text-sm border-l-2 border-secondary/50 pl-4">
+										RECONSTRUCT THE EVIDENCE. SELECT SLOT, THEN SELECT FRAGMENT.
+									</p>
 
-							<div className="flex justify-end">
-								<button
-									onClick={handleNext}
-									disabled={!ddCorrect}
-									className="btn-investigate px-6 py-3 disabled:opacity-40 disabled:cursor-not-allowed"
-								>
-									Next
-								</button>
-							</div>
-						</div>
-					)}
+									<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+										{/* Puzzle Grid */}
+										<div>
+											<h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-4">Reconstruction Grid</h3>
+									
+											{/* Show Original Image if revealed, otherwise show puzzle grid */}
+											{showOriginalImage ? (
+												<div className="relative overflow-hidden rounded-lg border-2 border-secondary shadow-[0_0_30px_rgba(0,245,255,0.3)] bg-black animate-in fade-in zoom-in duration-500">
+													<div className="absolute inset-0 scanline opacity-50"></div>
+													<img
+														src={`/puzzle/${puzzleFolder}/original.png`}
+														alt="Complete Evidence"
+														className="w-full h-auto relative z-10"
+														onError={(e) => { e.target.style.display = "none"; }}
+													/>
+													<div className="absolute top-4 right-4 bg-secondary text-secondary-foreground px-4 py-1 rounded text-xs font-bold shadow-lg z-20 animate-pulse">
+														EVIDENCE RESTORED
+													</div>
+												</div>
+											) : (
+												<div className="grid grid-cols-3 gap-1 bg-muted/50 p-2 rounded border border-border">
+													{puzzleConfig.layout.map((fileName, idx) => {
+														const isKeySlot = fileName.startsWith("key_");
+														const hasPlacedKey = gridState[idx];
+														
+														return (
+															<button
+																key={idx}
+																onClick={() => isKeySlot && handleSlotClick(idx)}
+																className={`aspect-square rounded flex items-center justify-center text-center text-xs font-mono overflow-hidden transition-all ${ 
+																	isKeySlot
+																		? selectedSlot === idx
+																			? "border-2 border-primary bg-primary/20 cursor-pointer shadow-[inset_0_0_10px_rgba(255,59,59,0.5)]"
+																			: hasPlacedKey
+																			? "border border-green-500/50 bg-green-500/10 cursor-default"
+																			: "border border-dashed border-muted-foreground/50 bg-background/50 cursor-pointer hover:border-primary/50 hover:bg-primary/5"
+																		: "border border-transparent bg-transparent cursor-default opacity-80"
+																}`}
+															>
+																{hasPlacedKey ? (
+																	<img
+																		src={`/puzzle/${puzzleFolder}/${hasPlacedKey}.png`}
+																		alt={hasPlacedKey}
+																		className="w-full h-full object-contain"
+																		onError={(e) => { e.target.style.display = "none"; }}
+																	/>
+																) : !isKeySlot ? (
+																	<img
+																		src={`/puzzle/${puzzleFolder}/${fileName}.png`}
+																		alt={fileName}
+																		className="w-full h-full object-contain"
+																		onError={(e) => { e.target.style.display = "none"; }}
+																	/>
+																) : (
+																	<span className="text-muted-foreground/50 text-2xl font-bold">+</span>
+																)}
+															</button>
+														);
+													})}
+												</div>
+											)}
+											
+											{puzzleSuccess && !showOriginalImage && (
+												<div className="mt-4 p-3 bg-green-500/10 border border-green-500/30 rounded animate-pulse">
+													<p className="text-green-400 text-xs font-bold font-mono">✓ MATCH CONFIRMED. DECRYPTING VISUAL...</p>
+												</div>
+											)}
+										</div>
 
-					{currentSubphase === 1 && puzzleConfig && (
-						<div className="evidence-card p-8">
-							<h2 className="text-2xl font-semibold mb-2">Sub-phase 2: Assemble Evidence (MM)</h2>
-								<p className="text-haze mb-6">Click on empty slots to select them, then click on puzzle pieces to place them in the grid.</p>
+										{/* Available Pieces */}
+										<div>
+											<h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-4">Fragment Bank</h3>
+											<div className="grid grid-cols-3 gap-3 mb-6 bg-muted/30 p-4 rounded-lg border border-border">
+												{getAvailableKeyPieces().map((keyFileName) => (
+													<button
+														key={keyFileName}
+														onClick={() => handleKeyPieceClick(keyFileName)}
+														className="aspect-square rounded border border-border bg-background hover:border-primary hover:shadow-[0_0_10px_rgba(255,59,59,0.3)] transition-all flex items-center justify-center p-1"
+													>
+														<img
+															src={`/puzzle/${puzzleFolder}/${keyFileName}.png`}
+															alt={keyFileName}
+															className="w-full h-full object-contain"
+															onError={(e) => { e.target.style.display = "none"; }}
+														/>
+													</button>
+												))}
+												{getAvailableKeyPieces().length === 0 && !puzzleSuccess && (
+													<div className="col-span-3 text-center py-4 text-muted-foreground text-xs font-mono">
+														NO FRAGMENTS REMAINING
+													</div>
+												)}
+											</div>
 
-								<div className="grid grid-cols-2 gap-8">
-									{/* Puzzle Grid */}
-									<div>
-										<h3 className="text-lg font-semibold mb-4 text-white">Puzzle Grid</h3>
-								
-								{/* Show Original Image if revealed, otherwise show puzzle grid */}
-								{showOriginalImage ? (
-									<div className="relative overflow-hidden rounded-lg border-4 border-emerald-500 shadow-2xl bg-black">
-										<div className="absolute inset-0 bg-gradient-to-r from-emerald-400/20 via-green-500/20 to-emerald-400/20 animate-pulse"></div>
-										<img
-											src={`/puzzle/${puzzleFolder}/original.png`}
-											alt="Complete Evidence"
-											className="w-full h-auto relative z-10 transform transition-all duration-1000 ease-out"
-											style={{ animation: "slideInScale 1s ease-out" }}
-											onError={(e) => { e.target.style.display = "none"; }}
-										/>
-										<div className="absolute top-4 right-4 bg-emerald-600 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg z-20 animate-bounce">
-											✓ EVIDENCE REVEALED
+											{puzzleError && (
+												<div className="p-3 bg-destructive/10 border border-destructive/50 rounded mb-4">
+													<p className="text-destructive text-xs font-bold">⚠ {puzzleError}</p>
+												</div>
+											)}
+
+											<div className="space-y-3">
+												<button
+													onClick={handleSubmitPuzzle}
+													disabled={getAvailableKeyPieces().length > 0}
+													className="w-full py-3 px-4 bg-primary text-primary-foreground font-bold rounded hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition uppercase tracking-wider text-sm shadow-md"
+												>
+													VERIFY CONFIGURATION
+												</button>
+												<button
+													onClick={handleResetPuzzle}
+													className="w-full py-2 px-4 bg-transparent border border-muted-foreground/30 text-muted-foreground font-bold rounded hover:border-foreground hover:text-foreground transition text-xs uppercase"
+												>
+													RESET GRID
+												</button>
+											</div>
 										</div>
 									</div>
-								) : (
-									<div className="grid grid-cols-3 gap-0 bg-ink p-6 rounded border border-white/20">
-										{puzzleConfig.layout.map((fileName, idx) => {
-											const isKeySlot = fileName.startsWith("key_");
-											const hasPlacedKey = gridState[idx];
+
+									<div className="flex justify-end mt-8">
+										<button
+											onClick={handleNext}
+											disabled={!isSubphase2Complete}
+											className="px-8 py-3 bg-secondary text-secondary-foreground font-bold rounded hover:bg-secondary/90 disabled:opacity-40 disabled:cursor-not-allowed uppercase tracking-widest transition-all shadow-lg shadow-secondary/20"
+										>
+											NEXT PROTOCOL
+										</button>
+									</div>
+								</div>
+							)}
+
+							{currentSubphase === 2 && officer && (
+								<div className="bg-card border border-border p-8 rounded-xl shadow-md animate-fadeIn">
+									<h2 className="text-2xl font-bold mb-2 text-primary">PROTOCOL 3: TEMPORAL LOCK (YYYY)</h2>
+									<p className="text-muted-foreground mb-8 font-mono text-sm border-l-2 border-secondary/50 pl-4">
+										ANALYZE NAVIGATION ROUTES. UNSCRAMBLE THE KEYWORD. REVEAL THE YEAR.
+									</p>
+
+									{/* DEBUG - Show if routeOptions exist */}
+									{(!shuffledRoutes || shuffledRoutes.length === 0) && (
+										<div className="bg-destructive/10 border border-destructive/50 p-4 rounded mb-4">
+											<p className="text-destructive text-sm font-mono">⚠ SYSTEM ERROR: ROUTE DATA UNREACHABLE.</p>
+										</div>
+									)}
+
+									{/* Jumbled Word Display */}
+									<div className="text-center mb-10">
+										<p className="text-secondary text-xs uppercase tracking-widest mb-3 font-bold">Encrypted Keyword</p>
+										<div className="inline-block bg-muted/50 border-2 border-primary/50 rounded-lg px-12 py-6 shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] relative overflow-hidden">
+											<div className="absolute inset-0 scanline opacity-30"></div>
+											<p className="text-4xl font-mono text-primary tracking-[0.5em] font-bold animate-pulse">
+												{(officer?.jumbled || officer?.jumbledWord) && (officer.jumbled || officer.jumbledWord).split("").sort().join(" ")}
+											</p>
+										</div>
+										<p className="text-muted-foreground text-xs mt-4 font-mono">DECRYPT BEFORE PROCEEDING</p>
+									</div>
+
+									{/* Route Buttons */}
+									<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+										{shuffledRoutes.map((route, idx) => {
+											const routeNum = idx + 1;
+											const jumbledWord = officer?.jumbled || officer?.jumbledWord || "INVESTIGATION";
+											const routeUrl = `/route-challenge?routeId=${routeNum}&jumbled=${jumbledWord}&answer=${officer?.answer || ""}&year=${officer?.dob?.substring(4) || ""}&isCorrect=${route.isCorrect}`;
 											
 											return (
-												<button
+												<a
 													key={idx}
-													onClick={() => isKeySlot && handleSlotClick(idx)}
-													className={`aspect-square rounded border-2 flex items-center justify-center text-center text-xs font-mono overflow-hidden ${ 
-														isKeySlot
-															? selectedSlot === idx
-																? "border-ember bg-ember/30 cursor-pointer"
-																: hasPlacedKey
-																? "border-green-500/50 bg-green-900/20 cursor-default"
-																: "border-dashed border-white/20 bg-ink/50 cursor-pointer hover:border-white/40"
-															: "border-white/20 bg-ink/80 cursor-default"
-													}`}
+													href={routeUrl}
+													target="_blank"
+													rel="noopener noreferrer"
+													className="p-6 rounded-lg border border-border bg-card hover:bg-muted/50 hover:border-secondary transition-all group text-center cursor-pointer shadow-sm relative overflow-hidden"
 												>
-													{hasPlacedKey ? (
-														// User placed a key here
-														<img
-															src={`/puzzle/${puzzleFolder}/${hasPlacedKey}.png`}
-															alt={hasPlacedKey}
-															className="w-full h-full object-contain"
-															onError={(e) => { e.target.style.display = "none"; }}
-														/>
-													) : !isKeySlot ? (
-														// Fixed puzzle piece (not a key slot)
-														<img
-															src={`/puzzle/${puzzleFolder}/${fileName}.png`}
-															alt={fileName}
-															className="w-full h-full object-contain"
-															onError={(e) => { e.target.style.display = "none"; }}
-														/>
-													) : (
-														// Empty key slot (no piece placed yet)
-														<span className="text-haze text-lg font-bold">?</span>
-													)}
-												</button>
+													<div className="absolute inset-0 bg-secondary/5 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+													<p className="text-xl font-bold text-foreground mb-2 relative z-10 group-hover:text-secondary">ROUTE {routeNum}</p>
+													<p className="text-muted-foreground text-sm font-mono relative z-10">{route.label || `Path ${routeNum}`}</p>
+													<p className="text-xs text-secondary mt-4 opacity-0 group-hover:opacity-100 transition-opacity relative z-10">INITIATE TRAVERSAL →</p>
+												</a>
 											);
 										})}
 									</div>
-								)}
-								
-								{puzzleSuccess && !showOriginalImage && (
-									<div className="mt-4 p-3 bg-green-900/30 border border-green-500/50 rounded animate-pulse">
-										<p className="text-green-300 text-sm font-semibold">✓ Puzzle solved! Revealing evidence...</p>
+
+									{/* Hint */}
+									<div className="bg-secondary/10 border border-secondary/30 p-4 rounded mb-8">
+										<p className="text-secondary text-xs font-mono">
+											<span className="font-bold">INSTRUCTION:</span> OPEN EACH ROUTE. IDENTIFY THE CORRECT PATH TO ACQUIRE THE "YYYY" COMPONENT.
+										</p>
 									</div>
-								)}
-							</div>
 
-							{/* Available Pieces */}
-							<div>
-								<h3 className="text-lg font-semibold mb-4 text-white">Available Pieces</h3>
-										<div className="grid grid-cols-2 gap-3 mb-6">
-											{getAvailableKeyPieces().map((keyFileName) => (
-												<button
-													key={keyFileName}
-													onClick={() => handleKeyPieceClick(keyFileName)}
-													className="aspect-square rounded border-2 border-ember/50 bg-ember/10 hover:bg-ember/20 hover:border-ember transition flex items-center justify-center"
-												>
-													<img
-														src={`/puzzle/${puzzleFolder}/${keyFileName}.png`}
-														alt={keyFileName}
-														className="w-full h-full object-contain rounded"
-														onError={(e) => { e.target.style.display = "none"; }}
-													/>
-												</button>
-											))}
-										</div>
-
-										{puzzleError && (
-											<div className="p-3 bg-ember/20 border border-ember/50 rounded mb-4">
-												<p className="text-ember text-sm">⚠️ {puzzleError}</p>
+									{/* Completion status */}
+									{yearRevealed && (
+										<div className="bg-green-500/10 border border-green-500/50 p-6 rounded mb-8 flex items-center gap-4 shadow-[0_0_20px_rgba(34,197,94,0.1)]">
+											<div className="p-3 bg-green-500/20 rounded-full text-green-500 text-2xl">✓</div>
+											<div>
+												<p className="text-green-500 font-bold tracking-wide">YEAR COMPONENT RETRIEVED</p>
+												<p className="text-muted-foreground text-sm mt-1 font-mono">FULL DATE OF BIRTH COMPILED: DD-MM-YYYY</p>
 											</div>
-										)}
-
-										<div className="space-y-3">
-											<button
-												onClick={handleSubmitPuzzle}
-												disabled={getAvailableKeyPieces().length > 0}
-												className="w-full py-2 px-4 bg-green-600 text-white font-semibold rounded hover:bg-green-700 disabled:opacity-40 disabled:cursor-not-allowed transition"
-											>
-												Verify Puzzle
-											</button>
-											<button
-												onClick={handleResetPuzzle}
-												className="w-full py-2 px-4 bg-ink border border-white/20 text-haze font-semibold rounded hover:border-white/40 transition"
-											>
-												Reset
-											</button>
 										</div>
+									)}
+
+									<div className="flex justify-end">
+										<button
+											onClick={handleNext}
+											disabled={!yearRevealed}
+											className="px-8 py-3 bg-primary text-primary-foreground font-bold rounded hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-primary/20 uppercase tracking-widest"
+										>
+											FINALIZE PHASE 1
+										</button>
 									</div>
 								</div>
-
-								<div className="flex justify-end mt-8">
-									<button
-										onClick={handleNext}
-										disabled={!isSubphase2Complete}
-										className="btn-investigate px-6 py-3 disabled:opacity-40 disabled:cursor-not-allowed"
-									>
-										Next
-									</button>
-								</div>
-							</div>
-						)}
-
-						{currentSubphase === 2 && officer && (
-							<div className="evidence-card p-8">
-								<h2 className="text-2xl font-semibold mb-2">Sub-phase 3: Reveal the Year (YYYY)</h2>
-								<p className="text-haze mb-8">Investigate the routes below to find the correct one. Unscramble the word and answer correctly to reveal the year.</p>
-
-								{/* DEBUG - Show if routeOptions exist */}
-				{(!shuffledRoutes || shuffledRoutes.length === 0) && (
-					<div className="bg-red-900/30 border border-red-500/50 p-4 rounded mb-4">
-						<p className="text-red-400 text-sm">⚠️ Debug: routeOptions not found. Data: {JSON.stringify(shuffledRoutes)}</p>
-					</div>
-				)}
-
-				{/* Jumbled Word Display */}
-				<div className="text-center mb-10">
-					<p className="text-haze text-sm mb-3">🔤 Jumbled Word:</p>
-					<div className="inline-block bg-ink border-2 border-ember/50 rounded px-8 py-6">
-						<p className="text-3xl font-mono text-ember tracking-widest font-bold">
-							{(officer?.jumbled || officer?.jumbledWord) && (officer.jumbled || officer.jumbledWord).split("").sort().join(" ")}
-						</p>
-					</div>
-					<p className="text-haze text-xs mt-4">Remember this word before exploring the routes</p>
+							)}
+						</>
+					)}
 				</div>
-
-				{/* Route Buttons */}
-				<div className="grid grid-cols-3 gap-4 mb-8">
-					{shuffledRoutes.map((route, idx) => {
-										const routeNum = idx + 1;
-										const jumbledWord = officer?.jumbled || officer?.jumbledWord || "INVESTIGATION";
-										const routeUrl = `/route-challenge?routeId=${routeNum}&jumbled=${jumbledWord}&answer=${officer?.answer || ""}&year=${officer?.dob?.substring(4) || ""}&isCorrect=${route.isCorrect}`;
-										
-										return (
-											<a
-												key={idx}
-												href={routeUrl}
-												target="_blank"
-												rel="noopener noreferrer"
-												className="p-6 rounded border-2 bg-ink hover:bg-ink/80 border-white/20 hover:border-ember/50 transition text-center cursor-pointer"
-											>
-												<p className="text-lg font-bold text-white mb-2">Route {routeNum}</p>
-												<p className="text-haze text-sm">{route.label || `Path ${routeNum}`}</p>
-												<p className="text-xs text-haze/60 mt-2">→ Click to explore</p>
-											</a>
-										);
-									})}
-								</div>
-
-								{/* Hint */}
-								<div className="bg-amber-900/20 border border-amber-500/30 p-4 rounded mb-8">
-									<p className="text-amber-300 text-sm">
-										💡 <strong>Hint:</strong> Open each route in a new tab. One route will give you the key to reveal the year. 
-										Remember to unscramble the word and provide the correct answer.
-									</p>
-								</div>
-
-								{/* Completion status */}
-								{yearRevealed && (
-									<div className="bg-green-900/30 border border-green-500/50 p-4 rounded mb-8">
-										<p className="text-green-300 font-semibold">✓ Year revealed!</p>
-										<p className="text-haze text-sm mt-2">You have collected all three parts: DD-MM-YYYY</p>
-									</div>
-								)}
-
-								<div className="flex justify-end">
-									<button
-										onClick={handleNext}
-										disabled={!yearRevealed}
-										className="btn-investigate px-6 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed"
-									>
-										Complete Phase 1
-									</button>
-								</div>
-							</div>
-						)}
-					</>
-				)}
 			</div>
-		</div>
 		</div>
 	);
 }

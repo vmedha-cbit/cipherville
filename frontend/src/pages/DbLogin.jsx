@@ -84,88 +84,95 @@ export default function DbLogin() {
   };
 
   return (
-    <div className="min-h-screen relative">
-      <div className="film-grain" />
-      
-      {/* Timer Display */}
-      <div className="fixed top-6 right-6 z-50">
-        <div className={`px-6 py-3 rounded-lg font-mono text-xl font-bold ${
-          gameStartedAt ? 'bg-green-900/60 text-green-300' : 'bg-gray-900/60 text-gray-300'
-        } border ${gameStartedAt ? 'border-green-500/50' : 'border-gray-500/50'}`}>
-          {gameStartedAt ? formatTime(timeRemaining) : 'Loading timer...'}
-        </div>
-      </div>
+    <div className="min-h-screen relative overflow-hidden bg-background flex items-center justify-center p-6">
+      <div className="absolute inset-0 z-0 opacity-10 fingerprint-bg"></div>
+      <div className="absolute inset-0 z-0 grid-overlay opacity-20"></div>
 
-      <div className="min-h-screen flex items-center justify-center px-6 py-10">
-        <div className="w-full max-w-lg evidence-card p-10">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="inline-block px-4 py-1 bg-amber-600/20 border border-amber-500/50 rounded-full mb-3">
-              <span className="text-amber-500 text-xs font-bold tracking-wider">RESTRICTED ACCESS</span>
-            </div>
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600 bg-clip-text text-transparent">
-              Central Investigation Database
-            </h2>
-            <p className="text-haze text-sm mt-2">Authorized Personnel Only</p>
+      <div className="w-full max-w-lg bg-card border border-border md:border-t-4 md:border-t-primary p-10 rounded-xl shadow-[0_0_50px_rgba(0,0,0,0.5)] relative z-10 animate-fadeIn backdrop-blur-sm">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-block px-3 py-1 bg-primary/10 border border-primary/20 rounded-full mb-4 shadow-[0_0_10px_rgba(255,59,59,0.2)]">
+            <span className="text-primary text-xs font-bold tracking-[0.3em] uppercase animate-pulse">Restricted Access</span>
           </div>
+          <h2 className="text-3xl font-bold text-foreground tracking-tight">
+            CENTRAL <span className="text-primary">DATABASE</span>
+          </h2>
+          <div className="h-1 w-20 bg-primary mx-auto mt-4 mb-2 rounded-full"></div>
+          <p className="text-muted-foreground text-sm font-mono tracking-wider">AUTHORIZED PERSONNEL ONLY</p>
+        </div>
 
         {/* Login Form */}
         <form className="space-y-6" onSubmit={handleSubmit}>
           {/* Username Field */}
           <div>
-            <label className="block text-sm font-medium text-haze mb-2">Officer ID</label>
-            <input
-              className="w-full p-3 bg-ink/80 border border-white/10 rounded text-white font-mono"
-              value={username}
-              readOnly
-              disabled
-            />
+            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Officer ID</label>
+            <div className="relative">
+               <input
+                 className="w-full p-3 bg-muted/40 border border-border rounded text-foreground font-mono pl-10 cursor-not-allowed opacity-70"
+                 value={username || "LOADING..."}
+                 readOnly
+                 disabled
+               />
+               <div className="absolute left-3 top-3 text-primary">👮</div>
+            </div>
           </div>
 
           {/* Password Field with Hint */}
-          <div className="relative">
-            <label className="block text-sm font-medium text-haze mb-2">Access Code</label>
-            <div className="flex items-center gap-3">
-              <input
-                type="password"
-                className="flex-1 p-3 bg-ink border border-white/10 rounded text-white"
-                placeholder={hintClicked ? "DDMMYYYY" : "Enter access code"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+          <div>
+            <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Access Code</label>
+            <div className="relative flex gap-2">
+              <div className="relative flex-1">
+                 <input
+                   type="password"
+                   className="w-full p-3 bg-muted/40 border border-input rounded text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all pl-10"
+                   placeholder={hintClicked ? "DDMMYYYY" : "Enter access code"}
+                   value={password}
+                   onChange={(e) => setPassword(e.target.value)}
+                   required
+                 />
+                 <div className="absolute left-3 top-3 text-primary">🔑</div>
+              </div>
               
               {/* Hint Button */}
               {showHint && (
                 <button
                   type="button"
                   onClick={handleHintClick}
-                  className={`px-4 py-3 bg-ink border-2 border-ember/50 rounded text-ember font-semibold hover:bg-ember/10 transition-all ${
-                    showHint ? 'animate-pulse' : ''
+                  className={`px-4 bg-secondary/10 border border-secondary/30 rounded text-secondary font-bold hover:bg-secondary/20 transition-all ${
+                    showHint ? 'animate-[pulse_2s_infinite]' : ''
                   }`}
                   title="Click for hint"
                 >
-                  💡 Hint
+                  💡
                 </button>
               )}
             </div>
           </div>
 
           {error && (
-            <div className="p-3 bg-ember/10 border border-ember/30 rounded">
-              <p className="text-ember text-sm">⚠️ {error}</p>
+            <div className="p-4 bg-destructive/10 border border-destructive/50 rounded flex items-center gap-3">
+              <span className="text-xl">⚠️</span>
+              <p className="text-destructive text-sm font-bold">{error}</p>
             </div>
           )}
 
           <button 
             type="submit"
-            className="btn-investigate w-full py-3"
+            className="w-full py-4 bg-primary text-primary-foreground font-bold rounded-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 tracking-widest uppercase flex items-center justify-center gap-2 group overflow-hidden relative"
           >
-            🔓 Access Database
+            <span className="relative z-10 flex items-center gap-2">
+               <span>🔓</span> ACCESS DATABASE
+            </span>
+            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
           </button>
         </form>
+        
+        <div className="mt-6 pt-6 border-t border-border text-center">
+            <p className="text-[10px] text-muted-foreground font-mono">
+                SECURE CONNECTION • ENCRYPTION: AES-256
+            </p>
+        </div>
       </div>
-    </div>
 
       {/* Officer Info Button - Bottom Right */}
       <button
@@ -186,10 +193,10 @@ export default function DbLogin() {
             console.error("Error:", err);
           }
         }}
-        className="fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 bg-ink border-2 border-white/20 rounded-full text-haze font-semibold hover:bg-white/10 hover:border-amber-500/50 hover:text-white transition-all shadow-lg flex items-center gap-2 z-50"
+        className="fixed bottom-8 left-1/2 -translate-x-1/2 px-8 py-3 bg-card border border-primary/30 rounded-full text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all shadow-[0_0_20px_rgba(0,0,0,0.3)] flex items-center gap-3 z-50 group backdrop-blur-sm"
       >
-        <span>📋</span>
-        <span>Go to Officer Information</span>
+        <span className="text-xl group-hover:rotate-12 transition-transform">📋</span>
+        <span className="font-bold tracking-wide text-sm">OFFICER BRIEFING</span>
       </button>
     </div>
   );

@@ -36,35 +36,47 @@ export default function OtpEntry() {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
-       <div className="absolute inset-0 z-0 opacity-20 bg-[url('https://media.giphy.com/media/dummy/giphy.gif')] bg-cover"></div> 
-       {/* Placeholder for noise/video bg if available, otherwise just black */}
+    <div className="min-h-screen bg-background relative overflow-hidden flex items-center justify-center p-4">
+       {/* Background */}
+       <div className="absolute inset-0 z-0 opacity-20 fingerprint-bg"></div>
+       <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-secondary/5 via-transparent to-transparent opacity-40"></div>
        
-       <div className="relative z-10 bg-black/80 border border-green-500/30 p-8 rounded-lg max-w-md w-full backdrop-blur-md shadow-2xl shadow-green-900/20">
+       <div className="relative z-10 w-full max-w-md bg-card border border-secondary/30 p-8 rounded-xl shadow-[0_0_30px_rgba(0,245,255,0.1)] backdrop-blur-sm animate-fadeIn">
+         {/* Scanline decoration */}
+         <div className="absolute inset-x-0 top-0 h-[2px] bg-secondary/50 shadow-[0_0_10px_rgba(0,245,255,0.5)]"></div>
+         
          <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600 mb-2 font-mono tracking-tighter">CIPHERVILLE</h1>
-            <div className="h-1 w-24 bg-green-500 mx-auto rounded"></div>
+            <h1 className="text-3xl font-bold text-foreground mb-2 font-mono tracking-tighter">CIPHERVILLE</h1>
+            <div className="h-1 w-24 bg-secondary mx-auto rounded shadow-[0_0_10px_rgba(0,245,255,0.5)]"></div>
          </div>
          
-         <h2 className="text-xl font-mono text-green-500 mb-6 text-center tracking-wide">AUTHENTICATION REQUIRED</h2>
-         <p className="text-gray-400 mb-8 text-center font-mono text-sm leading-relaxed">
-           Security Protocol Enforced.<br/>Enter the session access code provided by your supervising officer.
-         </p>
+         <div className="bg-secondary/5 border border-secondary/20 p-4 rounded mb-6">
+           <h2 className="text-xl font-mono text-secondary mb-2 text-center tracking-wide flex items-center justify-center gap-2">
+             <span className="w-2 h-2 bg-secondary rounded-full animate-pulse"></span>
+             AUTHENTICATION REQUIRED
+             <span className="w-2 h-2 bg-secondary rounded-full animate-pulse"></span>
+           </h2>
+           <p className="text-muted-foreground text-center font-mono text-xs leading-relaxed">
+             Security Protocol Enforced.<br/>Enter the session access code provided by your supervising officer.
+           </p>
+         </div>
          
          <form onSubmit={handleSubmit} className="space-y-6">
-           <div>
+           <div className="relative group">
+             <div className="absolute -inset-0.5 bg-gradient-to-r from-secondary to-primary rounded-lg blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
              <input 
                type="text" 
                value={otp}
                onChange={(e) => setOtp(e.target.value)}
                placeholder="------"
-               className="w-full bg-black/50 border border-green-500/50 text-green-400 p-4 rounded text-center font-mono text-3xl tracking-[1em] focus:outline-none focus:border-green-400 focus:shadow-[0_0_20px_rgba(74,222,128,0.2)] transition-all placeholder-green-900/50"
+               className="relative w-full bg-black/40 border border-secondary/50 text-secondary p-4 rounded text-center font-mono text-3xl tracking-[1em] focus:outline-none focus:border-secondary focus:shadow-[0_0_20px_rgba(0,245,255,0.2)] transition-all placeholder-secondary/20 uppercase"
                maxLength={6}
+               disabled={loading}
              />
            </div>
            
            {error && (
-               <div className="bg-red-900/20 border border-red-500/50 text-red-400 text-center p-3 rounded font-mono text-xs">
+               <div className="bg-destructive/10 border border-destructive/50 text-destructive text-center p-3 rounded font-mono text-xs animate-pulse">
                    ⚠ {error}
                </div>
            )}
@@ -72,14 +84,24 @@ export default function OtpEntry() {
            <button 
              type="submit" 
              disabled={loading}
-             className="w-full bg-gradient-to-r from-green-900 to-emerald-900 text-green-300 border border-green-500/30 py-4 rounded hover:from-green-800 hover:to-emerald-800 transition-all font-mono font-bold tracking-wider hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
+             className="w-full bg-secondary/10 border border-secondary/50 text-secondary py-4 rounded hover:bg-secondary/20 transition-all font-mono font-bold tracking-wider hover:shadow-[0_0_15px_rgba(0,245,255,0.4)] disabled:opacity-50 disabled:cursor-not-allowed uppercase relative overflow-hidden group"
            >
-             {loading ? "VERIFYING..." : "ACCESS SYSTEM"}
+             {loading ? (
+               <span className="flex items-center justify-center gap-2">
+                 <span className="inline-block w-4 h-4 border-2 border-secondary border-t-transparent rounded-full animate-spin"></span>
+                 VERIFYING CREDENTIALS...
+               </span>
+             ) : (
+               <>
+                 <span className="relative z-10">ACCESS SYSTEM</span>
+                 <div className="absolute inset-0 h-full w-full scale-0 rounded transition-all duration-300 group-hover:scale-100 group-hover:bg-secondary/5"></div>
+               </>
+             )}
            </button>
          </form>
          
-         <div className="mt-8 text-center border-t border-green-900/30 pt-4">
-             <p className="text-[10px] text-green-800 font-mono uppercase tracking-widest">
+         <div className="mt-8 text-center border-t border-secondary/10 pt-4">
+             <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest">
                  System Version 2.0.4 • Access Level: RESTRICTED
              </p>
          </div>

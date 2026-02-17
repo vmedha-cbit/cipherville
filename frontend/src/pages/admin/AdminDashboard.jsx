@@ -195,230 +195,289 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen px-6 py-10 film-grain">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-500 to-orange-600 bg-clip-text text-transparent">
-          Admin Dashboard
-        </h2>
+    <div className="min-h-screen relative overflow-hidden bg-background p-6">
+      <div className="absolute inset-0 z-0 opacity-10 fingerprint-bg"></div>
+      <div className="absolute inset-0 z-0 grid-overlay opacity-20"></div>
+
+      <div className="max-w-7xl mx-auto space-y-6 relative z-10">
+        <header className="flex items-center justify-between border-b border-border pb-6">
+          <h2 className="text-3xl font-bold text-foreground tracking-tight">
+            Admin <span className="text-primary">Command Center</span>
+          </h2>
+          <div className="text-xs font-mono text-muted-foreground bg-muted/50 px-3 py-1 rounded">
+             SYS.ADMIN.V2
+          </div>
+        </header>
+
         <AdminNav />
         
-        <div className="evidence-card p-5 rounded-xl flex flex-col md:flex-row md:items-center gap-3">
-          <p className="text-haze">Need quick demo data?</p>
-          <button className="px-6 py-3 btn-investigate text-black font-bold rounded-lg" onClick={seedDemo}>
+        {/* Seed Data Panel */}
+        <div className="bg-card border border-border p-6 rounded-xl flex flex-col md:flex-row md:items-center gap-4 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
+          <div className="flex-1">
+             <h3 className="font-bold text-foreground">Demo Data Injection</h3>
+             <p className="text-muted-foreground text-sm">Need quick data for testing?</p>
+          </div>
+          <button 
+             className="px-6 py-2 bg-secondary/10 border border-secondary/50 text-secondary hover:bg-secondary/20 rounded font-mono text-sm font-bold uppercase transition-all" 
+             onClick={seedDemo}
+          >
             Insert Demo Data
           </button>
           {seedInfo?.storyId && (
-            <p className="text-xs text-green-400 font-semibold">✓ Seeded Story ID: {seedInfo.storyId}</p>
+            <p className="text-xs text-green-500 font-mono flex items-center gap-1">
+              <span>✓</span> Seeded: {seedInfo.storyId}
+            </p>
           )}
         </div>
 
         {/* Completion Stats */}
         {data.users.length > 0 && (
-          <div className="evidence-card p-6 rounded-xl">
-            <h3 className="text-2xl font-bold text-amber-500 mb-4">Completion Analytics</h3>
-            <div className="grid md:grid-cols-3 gap-4">
-              <div className="bg-black/40 p-4 rounded-lg">
-                <p className="text-haze text-sm font-semibold">Completion Rate</p>
-                <p className="text-3xl font-bold text-green-400 mt-2">
-                  {Math.round((data.users.filter(u => u.gameStatus === 'completed' || u.phase === 'complete').length / data.users.length) * 100)}%
-                </p>
-                <p className="text-xs text-haze mt-2">
-                  {data.users.filter(u => u.gameStatus === 'completed' || u.phase === 'complete').length} of {data.users.length} completed
+          <div className="bg-card border border-border p-6 rounded-xl shadow-sm">
+            <h3 className="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
+              <span className="w-1 h-6 bg-primary rounded-full"></span>
+              Analytics Overview
+            </h3>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="bg-muted/30 p-5 rounded-lg border border-border/50">
+                <p className="text-muted-foreground text-xs font-mono uppercase tracking-wider">Completion Rate</p>
+                <div className="flex items-end gap-2 mt-2">
+                  <p className="text-4xl font-bold text-green-500">
+                    {Math.round((data.users.filter(u => u.gameStatus === 'completed' || u.phase === 'complete').length / data.users.length) * 100)}%
+                  </p>
+                </div>
+                <div className="w-full bg-background h-1 mt-3 rounded-full overflow-hidden">
+                   <div className="h-full bg-green-500" style={{ width: `${(data.users.filter(u => u.gameStatus === 'completed' || u.phase === 'complete').length / data.users.length) * 100}%` }}></div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {data.users.filter(u => u.gameStatus === 'completed' || u.phase === 'complete').length} / {data.users.length} agents
                 </p>
               </div>
-              <div className="bg-black/40 p-4 rounded-lg">
-                <p className="text-haze text-sm font-semibold">Timeout Rate</p>
-                <p className="text-3xl font-bold text-red-400 mt-2">
-                  {Math.round((data.users.filter(u => u.gameStatus === 'timeout').length / data.users.length) * 100)}%
-                </p>
-                <p className="text-xs text-haze mt-2">
-                  {data.users.filter(u => u.gameStatus === 'timeout').length} of {data.users.length} timed out
+
+              <div className="bg-muted/30 p-5 rounded-lg border border-border/50">
+                <p className="text-muted-foreground text-xs font-mono uppercase tracking-wider">Timeout Rate</p>
+                 <div className="flex items-end gap-2 mt-2">
+                  <p className="text-4xl font-bold text-destructive">
+                    {Math.round((data.users.filter(u => u.gameStatus === 'timeout').length / data.users.length) * 100)}%
+                  </p>
+                </div>
+                 <div className="w-full bg-background h-1 mt-3 rounded-full overflow-hidden">
+                   <div className="h-full bg-destructive" style={{ width: `${(data.users.filter(u => u.gameStatus === 'timeout').length / data.users.length) * 100}%` }}></div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {data.users.filter(u => u.gameStatus === 'timeout').length} / {data.users.length} agents
                 </p>
               </div>
-              <div className="bg-black/40 p-4 rounded-lg">
-                <p className="text-haze text-sm font-semibold">In Progress</p>
-                <p className="text-3xl font-bold text-blue-400 mt-2">
-                  {data.users.filter(u => u.gameStatus === 'playing').length}
-                </p>
-                <p className="text-xs text-haze mt-2">
-                  {data.users.filter(u => u.gameStatus === 'playing').length} currently playing
+
+              <div className="bg-muted/30 p-5 rounded-lg border border-border/50">
+                <p className="text-muted-foreground text-xs font-mono uppercase tracking-wider">Active Investigators</p>
+                 <div className="flex items-end gap-2 mt-2">
+                  <p className="text-4xl font-bold text-secondary">
+                    {data.users.filter(u => u.gameStatus === 'playing').length}
+                  </p>
+                </div>
+                 <div className="w-full bg-background h-1 mt-3 rounded-full overflow-hidden">
+                   <div className="h-full bg-secondary animate-pulse" style={{ width: '100%' }}></div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                   Currently in field
                 </p>
               </div>
             </div>
           </div>
         )}
-        <div className="grid md:grid-cols-2 gap-4">
-          <div className="evidence-card p-5 rounded-xl flex flex-col gap-3">
-            <p className="text-haze">Default Timer Duration:</p>
-            <span className="text-white font-bold text-2xl">{timerDuration} minutes</span>
+        
+        {/* Controls Grid */}
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="bg-card border border-border p-6 rounded-xl flex flex-col justify-between gap-4">
+            <div>
+               <p className="text-muted-foreground text-sm font-mono uppercase">Global Timer Configuration</p>
+               <div className="flex items-baseline gap-2 mt-1">
+                 <span className="text-foreground font-bold text-3xl">{timerDuration}</span>
+                 <span className="text-muted-foreground text-sm">minutes</span>
+               </div>
+            </div>
             <button 
-              className="px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-500"
+              className="w-full py-3 bg-primary text-primary-foreground font-bold rounded-lg hover:bg-primary/90 transition shadow-lg shadow-primary/20"
               onClick={() => setShowTimerModal(true)}
             >
-              Change Duration
+              Adjust Duration
             </button>
           </div>
           
-          <div className="evidence-card p-5 rounded-xl flex flex-col gap-3">
-             <p className="text-haze">Session Access Code (OTP):</p>
-             <div className="flex items-center gap-3">
-                <span className="text-green-400 font-mono font-bold text-3xl tracking-widest bg-black/50 px-4 py-2 rounded">
-                    {data.currentOtp || "------"}
-                </span>
-                <button 
-                  onClick={async () => {
-                      const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
-                      if (window.confirm(`Generate new OTP: ${newOtp}? This will update the access code for all new logins.`)) {
-                          try {
-                              await api.post("/admin/otp", { otp: newOtp });
-                              setData(prev => ({ ...prev, currentOtp: newOtp }));
-                          } catch (err) {
-                              alert("Failed to update OTP");
-                          }
-                      }
-                  }}
-                  className="px-4 py-3 bg-amber-600 text-black font-bold rounded-lg hover:bg-amber-500"
-                >
-                  ↻ Regenerate
-                </button>
+          <div className="bg-card border border-border p-6 rounded-xl flex flex-col gap-4">
+             <div>
+               <p className="text-muted-foreground text-sm font-mono uppercase">Session Access Code (OTP)</p>
+               <div className="flex items-center gap-3 mt-2">
+                  <div className="bg-muted px-4 py-2 rounded text-secondary font-mono font-bold text-2xl tracking-[0.2em] border border-secondary/20 shadow-[0_0_10px_rgba(0,245,255,0.1)]">
+                      {data.currentOtp || "------"}
+                  </div>
+                  <button 
+                    onClick={async () => {
+                        const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+                        if (window.confirm(`Generate new OTP: ${newOtp}? This will update the access code for all new logins.`)) {
+                            try {
+                                await api.post("/admin/otp", { otp: newOtp });
+                                setData(prev => ({ ...prev, currentOtp: newOtp }));
+                            } catch (err) {
+                                alert("Failed to update OTP");
+                            }
+                        }
+                    }}
+                    className="p-3 bg-secondary/10 text-secondary hover:bg-secondary/20 rounded-lg border border-secondary/30 transition-all"
+                    title="Regenerate OTP"
+                  >
+                    ↻
+                  </button>
+               </div>
              </div>
-             <p className="text-xs text-haze">Users must enter this code after login to start game.</p>
+             <p className="text-xs text-muted-foreground">Required for investigator authentication.</p>
           </div>
         </div>
 
         {/* Error Display */}
         {error && (
-          <div className="evidence-card p-5 rounded-xl bg-red-900/20 border-2 border-red-500">
-            <p className="text-red-400 font-semibold">Error Loading Dashboard</p>
-            <p className="text-red-300 text-sm mt-2">{error}</p>
+          <div className="bg-destructive/10 border border-destructive/50 p-6 rounded-xl flex items-start gap-4">
+            <span className="text-2xl">⚠️</span>
+            <div>
+               <p className="text-destructive font-bold">System Error</p>
+               <p className="text-destructive-foreground text-sm mt-1">{error}</p>
+            </div>
           </div>
         )}
 
-        {/* Stats Grid */}
+        {/* Overall Stats Cards */}
         <div className="grid md:grid-cols-4 gap-4">
-          <div className="evidence-card p-6 rounded-xl">
-            <p className="text-amber-400 font-semibold">Total Players</p>
-            <p className="text-5xl font-bold text-white mt-2">{data.users.length}</p>
+          <div className="bg-card border border-border p-6 rounded-xl relative overflow-hidden">
+             <div className="absolute right-2 top-2 text-primary/10 text-6xl font-bold -z-0">#</div>
+            <p className="text-muted-foreground text-xs font-mono uppercase">Total Records</p>
+            <p className="text-4xl font-bold text-foreground mt-1 relative z-10">{data.users.length}</p>
           </div>
-          <div className="evidence-card p-6 rounded-xl">
-            <p className="text-amber-400 font-semibold">Completed</p>
-            <p className="text-5xl font-bold text-green-400 mt-2">{data.users.filter(u => u.gameStatus === 'completed' || u.phase === 'complete').length}</p>
+          <div className="bg-card border border-border p-6 rounded-xl">
+            <p className="text-muted-foreground text-xs font-mono uppercase">Success Cases</p>
+            <p className="text-4xl font-bold text-green-500 mt-1">{data.users.filter(u => u.gameStatus === 'completed' || u.phase === 'complete').length}</p>
           </div>
-          <div className="evidence-card p-6 rounded-xl">
-            <p className="text-amber-400 font-semibold">Timeout</p>
-            <p className="text-5xl font-bold text-red-400 mt-2">{data.users.filter(u => u.gameStatus === 'timeout').length}</p>
+          <div className="bg-card border border-border p-6 rounded-xl">
+            <p className="text-muted-foreground text-xs font-mono uppercase">Cold Cases (Timeout)</p>
+            <p className="text-4xl font-bold text-destructive mt-1">{data.users.filter(u => u.gameStatus === 'timeout').length}</p>
           </div>
-          <div className="evidence-card p-6 rounded-xl">
-            <p className="text-amber-400 font-semibold">Stories</p>
-            <p className="text-5xl font-bold text-white mt-2">{data.stories.length}</p>
+          <div className="bg-card border border-border p-6 rounded-xl">
+            <p className="text-muted-foreground text-xs font-mono uppercase">Database Size (Stories)</p>
+            <p className="text-4xl font-bold text-foreground mt-1">{data.stories.length}</p>
           </div>
         </div>
 
-        {/* Officers and Stories Summary Cards */}
-        <div className="grid md:grid-cols-2 gap-4">
-          <div className="evidence-card p-6 rounded-xl flex items-center justify-between">
+        {/* Management Actions */}
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="bg-card border border-border p-6 rounded-xl flex items-center justify-between hover:border-primary/50 transition-colors cursor-pointer group" onClick={() => navigate('/admin/officers')}>
             <div>
-               <h3 className="text-xl font-bold text-amber-500 mb-1">Officers Managed</h3>
-               <p className="text-haze text-sm">Review and edit officer profiles</p>
+               <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">Officer Management</h3>
+               <p className="text-muted-foreground text-xs mt-1">Personnel files & assignments</p>
             </div>
-            <button 
-              onClick={() => navigate('/admin/officers')}
-              className="px-4 py-2 bg-ink border border-amber-500/30 text-amber-400 rounded hover:bg-amber-900/20 transition"
-            >
-              Manage Officers →
-            </button>
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all">→</div>
           </div>
           
-          <div className="evidence-card p-6 rounded-xl flex items-center justify-between">
+          <div className="bg-card border border-border p-6 rounded-xl flex items-center justify-between hover:border-secondary/50 transition-colors cursor-pointer group" onClick={() => navigate('/admin/stories')}>
             <div>
-              <h3 className="text-xl font-bold text-amber-500 mb-1">Stories Managed</h3>
-              <p className="text-haze text-sm">Create and edit investigation stories</p>
+              <h3 className="text-lg font-bold text-foreground group-hover:text-secondary transition-colors">Case Files (Stories)</h3>
+              <p className="text-muted-foreground text-xs mt-1">Manage investigation narratives</p>
             </div>
-             <button 
-              onClick={() => navigate('/admin/stories')}
-              className="px-4 py-2 bg-ink border border-amber-500/30 text-amber-400 rounded hover:bg-amber-900/20 transition"
-            >
-              Manage Stories →
-            </button>
+             <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary group-hover:bg-secondary group-hover:text-secondary-foreground transition-all">→</div>
           </div>
         </div>
 
-        {/* Delete All Users Button */}
-        <div className="evidence-card p-5 rounded-xl bg-red-900/20 border-2 border-red-600/50 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-          <div>
-            <p className="text-red-400 font-semibold">Danger Zone</p>
-            <p className="text-red-300 text-sm">Delete all user records and start fresh</p>
+        {/* Danger Zones */}
+        <div className="grid md:grid-cols-2 gap-6">
+           {/* Delete All */}
+           <div className="bg-destructive/5 border border-destructive/30 p-6 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+             <div>
+                <p className="text-destructive font-bold flex items-center gap-2">
+                   <span>☢</span> DATABASE RESET
+                </p>
+                <p className="text-destructive-foreground/70 text-sm mt-1">Purge all participant records</p>
+             </div>
+             <button
+               className="px-6 py-2 bg-destructive text-destructive-foreground font-bold rounded hover:bg-destructive/90 transition shadow-lg shadow-destructive/20 text-sm"
+               onClick={() => setShowDeleteModal(true)}
+             >
+               EXECUTE PURGE
+             </button>
+           </div>
+           
+           {/* Logout All */}
+           <div className="bg-orange-500/5 border border-orange-500/30 p-6 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+             <div>
+                 <p className="text-orange-500 font-bold flex items-center gap-2">
+                    <span>⚡</span> SESSION OVERRIDE
+                 </p>
+                 <p className="text-orange-500/70 text-sm mt-1">Terminate all active connections</p>
+             </div>
+             <button
+                 className="px-6 py-2 bg-orange-600 text-white font-bold rounded hover:bg-orange-700 transition shadow-lg shadow-orange-500/20 text-sm"
+                 onClick={logoutAllUsers}
+             >
+                 FORCE LOGOUT
+             </button>
+           </div>
+        </div>
+
+        {/* Participants Table */}
+        <div className="bg-card border border-border rounded-xl shadow-md overflow-hidden">
+          <div className="p-6 border-b border-border bg-muted/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <h3 className="text-xl font-bold text-foreground">Live Surveillance</h3>
+            {loading ? (
+               <div className="text-secondary text-sm font-mono animate-pulse">Scanning network...</div>
+            ) : (
+                <div className="text-muted-foreground text-xs font-mono">{participants.length} Active Signals</div>
+            )}
           </div>
-          <button
-            className="px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 whitespace-nowrap"
-            onClick={() => setShowDeleteModal(true)}
-          >
-            Delete All Users
-          </button>
-        </div>
-
-        {/* User Management Actions */}
-        <div className="evidence-card p-5 rounded-xl bg-orange-900/20 border-2 border-orange-600/50 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <div>
-                <p className="text-orange-400 font-semibold">Session Control</p>
-                <p className="text-orange-300 text-sm">Force logout all participants</p>
-            </div>
-            <button
-                className="px-6 py-3 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 whitespace-nowrap"
-                onClick={logoutAllUsers}
-            >
-                Log Out All Users
-            </button>
-        </div>
-
-        {/* Participants List */}
-        <div className="evidence-card p-6 rounded-xl">
-          <h3 className="text-2xl font-bold text-amber-500 mb-4">Live Participant Tracking</h3>
+          
           {loading ? (
-            <div className="flex justify-center py-8">
-              <DetectiveLoading text="Tracking suspects..." />
+            <div className="flex justify-center py-20 flex-col items-center">
+               <div className="text-4xl mb-4 magnify-animate text-secondary">🔍</div>
+               <p className="text-muted-foreground font-mono text-sm">Retrieving data streams...</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-white/20">
-                  <th className="text-left p-3 text-amber-400 font-semibold">Roll Number</th>
-                  <th className="text-left p-3 text-amber-400 font-semibold">Name</th>
-                  <th className="text-left p-3 text-amber-400 font-semibold">Phase</th>
-                  <th className="text-left p-3 text-amber-400 font-semibold">Timer</th>
-                  <th className="text-left p-3 text-amber-400 font-semibold">Type</th>
-                  <th className="text-left p-3 text-amber-400 font-semibold">Completion Time</th>
-                  <th className="text-left p-3 text-amber-400 font-semibold">Actions</th>
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50 text-muted-foreground uppercase font-mono text-xs">
+                <tr>
+                  <th className="p-4 text-left font-semibold">Roll Number</th>
+                  <th className="p-4 text-left font-semibold">Codename</th>
+                  <th className="p-4 text-left font-semibold">Phase</th>
+                  <th className="p-4 text-left font-semibold">Timer</th>
+                  <th className="p-4 text-left font-semibold">Status</th>
+                  <th className="p-4 text-left font-semibold">Duration</th>
+                  <th className="p-4 text-left font-semibold">Access</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-border">
                   {participants.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="text-center p-6 text-haze">
-                      No participants yet
+                    <td colSpan="7" className="text-center p-12 text-muted-foreground">
+                       No active signatures detected.
                     </td>
                   </tr>
                 ) : (
                   participants.map((user) => {
                     const timer = timerStatus[user._id] || { remaining: null, isExpired: false, isPanic: false };
-                    const timerColor = timer.isExpired ? 'text-red-400' : timer.isPanic ? 'text-yellow-400' : 'text-green-400';
+                    const timerColor = timer.isExpired ? 'text-destructive' : timer.isPanic ? 'text-orange-400' : 'text-green-400';
                     return (
-                      <tr key={user._id} className="border-b border-white/5 hover:bg-white/5">
-                        <td className="p-3 text-white font-mono">{user.rollNo || user.rollNumber}</td>
-                        <td className="p-3 text-white">{user.displayName || '-'}</td>
-                        <td className="p-3 text-haze">{user.phase || 'officer'}</td>
-                        <td className={`p-3 font-mono font-bold ${timerColor}`}>
-                          {timer.remaining !== null ? formatTime(timer.remaining) : 'N/A'}
+                      <tr key={user._id} className="hover:bg-muted/30 transition-colors">
+                        <td className="p-4 font-mono font-bold text-primary">{user.rollNo || user.rollNumber}</td>
+                        <td className="p-4 text-foreground">{user.displayName || '-'}</td>
+                        <td className="p-4 text-muted-foreground font-mono text-xs uppercase">{user.phase || 'officer'}</td>
+                        <td className={`p-4 font-mono font-bold ${timerColor}`}>
+                          {timer.remaining !== null ? formatTime(timer.remaining) : '--:--'}
                         </td>
-                        <td className="p-3">{getStatusBadge(user)}</td>
-                        <td className="p-3 text-sm text-haze">{formatCompletionTime(user.completionTime)}</td>
-                        <td className="p-3">
+                        <td className="p-4">{getStatusBadge(user)}</td>
+                        <td className="p-4 text-muted-foreground font-mono">{formatCompletionTime(user.completionTime)}</td>
+                        <td className="p-4">
                           <button
                             onClick={() => viewParticipantDetails(user)}
-                            className="px-3 py-1 bg-amber-600 text-black font-semibold rounded hover:bg-amber-500 text-sm"
+                            className="px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded hover:bg-secondary/20 font-bold text-xs uppercase tracking-wide transition-all"
                           >
-                            View Details
+                            Investigate
                           </button>
                         </td>
                       </tr>
@@ -433,74 +492,92 @@ export default function AdminDashboard() {
 
         {/* Participant Details Modal */}
         {selectedParticipant && (
-          <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-6 overflow-y-auto">
-            <div className="evidence-card p-8 rounded-xl max-w-2xl w-full shadow-2xl my-6">
-              <div className="flex justify-between items-center mb-6 sticky top-0 bg-inherit z-10">
-                <h3 className="text-2xl font-bold text-amber-500">
-                  Participant Details: {selectedParticipant.rollNo || selectedParticipant.rollNumber}
-                </h3>
+          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-6 overflow-y-auto">
+            <div className="bg-card border border-border p-0 rounded-xl max-w-2xl w-full shadow-2xl my-6 flex flex-col max-h-[90vh]">
+              <div className="p-6 border-b border-border flex justify-between items-center sticky top-0 bg-card z-10 rounded-t-xl">
+                <div>
+                   <h3 className="text-2xl font-bold text-foreground">
+                     Subject Profile
+                   </h3>
+                   <p className="text-primary font-mono text-lg font-bold mt-1">
+                     {selectedParticipant.rollNo || selectedParticipant.rollNumber}
+                   </p>
+                </div>
                 <button
                   onClick={() => setSelectedParticipant(null)}
-                  className="text-haze hover:text-white text-2xl"
+                  className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:bg-destructive hover:text-white transition-all"
                 >
                   ✕
                 </button>
               </div>
 
-              <div className="space-y-4">
-                <div className="bg-black/40 p-4 rounded-lg">
-                  <p className="text-amber-400 text-sm font-semibold">Basic Info</p>
-                  <div className="mt-2 space-y-2">
-                    <p className="text-white"><span className="text-haze">Name:</span> {selectedParticipant.displayName || 'N/A'}</p>
-                    <p className="text-white"><span className="text-haze">Roll Number:</span> {selectedParticipant.rollNo || selectedParticipant.rollNumber}</p>
-                    <p className="text-white"><span className="text-haze">Current Phase:</span> {selectedParticipant.phase}</p>
-                    <p className="text-white"><span className="text-haze">Type:</span> {getStatusBadge(selectedParticipant)}</p>
-                    <p className="text-white"><span className="text-haze">Overall Completion Time:</span> {formatCompletionTime(selectedParticipant.completionTime)}</p>
-                    {selectedParticipant.startedAt && (
-                      <p className="text-haze text-xs">Started: {new Date(selectedParticipant.startedAt).toLocaleString()}</p>
-                    )}
-                    {selectedParticipant.completedAt && (
-                      <p className="text-green-400 text-xs">Completed: {new Date(selectedParticipant.completedAt).toLocaleString()}</p>
-                    )}
+              <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar">
+                <div className="bg-muted/20 p-4 rounded-lg border border-border/50">
+                  <p className="text-xs text-muted-foreground font-mono uppercase tracking-widest mb-3">Identity Verification</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <p className="text-xs text-muted-foreground">Name</p>
+                        <p className="text-foreground font-semibold">{selectedParticipant.displayName || 'Unknown'}</p>
+                    </div>
+                     <div>
+                        <p className="text-xs text-muted-foreground">ID</p>
+                        <p className="text-foreground font-semibold font-mono">{selectedParticipant.rollNo || selectedParticipant.rollNumber}</p>
+                    </div>
+                     <div>
+                        <p className="text-xs text-muted-foreground">Status</p>
+                        <div className="mt-1">{getStatusBadge(selectedParticipant)}</div>
+                    </div>
+                     <div>
+                        <p className="text-xs text-muted-foreground">Total Time</p>
+                        <p className="text-foreground font-mono">{formatCompletionTime(selectedParticipant.completionTime)}</p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="bg-black/40 p-4 rounded-lg">
-                  <p className="text-amber-400 text-sm font-semibold mb-3">Progress Timeline</p>
-                  {!selectedParticipant.progressTracking || selectedParticipant.progressTracking.length === 0 ? (
-                    <p className="text-haze text-sm">No progress data yet</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {selectedParticipant.progressTracking.map((progress, idx) => (
-                        <div key={idx} className="bg-steel/50 p-3 rounded border-l-4 border-amber-500">
-                          <p className="text-white font-semibold">{progress.subphase}</p>
-                          <div className="flex gap-4 mt-1 text-sm">
-                            <span className="text-green-400">⏱ Time Remaining: {formatTime(progress.timeRemaining)}</span>
-                            <span className="text-blue-400">📊 Elapsed: {formatTime(progress.timeElapsed)}</span>
-                          </div>
-                          <p className="text-haze text-xs mt-1">
-                            Completed: {new Date(progress.completedAt).toLocaleString()}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                <div className="relative">
+                   <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
+                   <div className="space-y-6 ml-4">
+                      
+                      {/* Timeline Items */}
+                      {!selectedParticipant.progressTracking || selectedParticipant.progressTracking.length === 0 ? (
+                        <p className="text-muted-foreground text-sm italic pl-6">No activity recorded.</p>
+                      ) : (
+                         selectedParticipant.progressTracking.map((progress, idx) => (
+                           <div key={idx} className="relative pl-6">
+                              <div className="absolute left-[-5px] top-1.5 w-2.5 h-2.5 rounded-full bg-primary border-2 border-background z-10"></div>
+                              <div className="bg-card border border-border p-3 rounded shadow-sm">
+                                <div className="flex justify-between items-start">
+                                    <h4 className="font-bold text-foreground text-sm">Phase {progress.subphase}</h4>
+                                    <span className="text-[10px] text-muted-foreground font-mono bg-muted/50 px-2 py-0.5 rounded">
+                                       {new Date(progress.completedAt).toLocaleTimeString()}
+                                    </span>
+                                </div>
+                                <div className="flex gap-4 mt-2 text-xs font-mono">
+                                    <span className="text-green-500">Remaining: {formatTime(progress.timeRemaining)}</span>
+                                    <span className="text-blue-500">Elapsed: {formatTime(progress.timeElapsed)}</span>
+                                </div>
+                              </div>
+                           </div>
+                         ))
+                      )}
+                      
+                   </div>
                 </div>
 
-                <div className="bg-black/40 p-4 rounded-lg">
-                  <p className="text-amber-400 text-sm font-semibold">Attempts</p>
-                  <div className="mt-2 grid grid-cols-3 gap-2 text-sm">
-                    <div>
-                      <p className="text-haze">DB Login</p>
-                      <p className="text-white font-bold">{selectedParticipant.attempts?.dbLogin || 0}</p>
+                <div className="bg-muted/20 p-4 rounded-lg border border-border/50">
+                  <p className="text-xs text-muted-foreground font-mono uppercase tracking-widest mb-3">System Interactions (Attempts)</p>
+                  <div className="grid grid-cols-3 gap-2 text-sm text-center">
+                    <div className="bg-background p-3 rounded border border-border">
+                      <p className="text-xs text-muted-foreground mb-1">DB Access</p>
+                      <p className="text-xl font-bold text-primary">{selectedParticipant.attempts?.dbLogin || 0}</p>
                     </div>
-                    <div>
-                      <p className="text-haze">Case Submit</p>
-                      <p className="text-white font-bold">{selectedParticipant.attempts?.caseSubmit || 0}</p>
+                    <div className="bg-background p-3 rounded border border-border">
+                      <p className="text-xs text-muted-foreground mb-1">Submissions</p>
+                      <p className="text-xl font-bold text-primary">{selectedParticipant.attempts?.caseSubmit || 0}</p>
                     </div>
-                    <div>
-                      <p className="text-haze">SQL Queries</p>
-                      <p className="text-white font-bold">{selectedParticipant.attempts?.sqlQueries || 0}</p>
+                    <div className="bg-background p-3 rounded border border-border">
+                      <p className="text-xs text-muted-foreground mb-1">Queries</p>
+                      <p className="text-xl font-bold text-primary">{selectedParticipant.attempts?.sqlQueries || 0}</p>
                     </div>
                   </div>
                 </div>
@@ -511,35 +588,37 @@ export default function AdminDashboard() {
 
         {/* Timer Duration Modal */}
         {showTimerModal && (
-          <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-            <div className="evidence-card p-8 rounded-xl max-w-md w-full shadow-2xl">
-              <h3 className="text-2xl font-bold text-amber-500 mb-6">Set Timer Duration</h3>
+          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-6 animate-fadeIn">
+            <div className="bg-card border border-border p-8 rounded-xl max-w-md w-full shadow-2xl">
+              <h3 className="text-2xl font-bold text-foreground mb-6">Global Timer Policy</h3>
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm text-amber-400 font-semibold">Duration (minutes)</label>
+                  <label className="text-sm text-primary font-bold uppercase tracking-wider">Duration (minutes)</label>
                   <input
                     type="number"
                     min="1"
                     max="120"
                     value={timerDuration}
                     onChange={(e) => setTimerDuration(parseInt(e.target.value) || 30)}
-                    className="w-full mt-2 p-3 bg-black/60 border-2 border-white/20 rounded-lg text-white font-mono text-xl focus:border-amber-500 outline-none"
+                    className="w-full mt-2 p-3 bg-muted/50 border border-input rounded-lg text-foreground font-mono text-xl focus:border-primary outline-none focus:ring-1 focus:ring-primary"
                   />
-                  <p className="text-haze text-xs mt-1">New users will get {timerDuration} minutes ({timerDuration * 60} seconds) to complete the game</p>
+                  <p className="text-muted-foreground text-xs mt-2">
+                     <span className="text-primary">*</span> Applies to all NEW investigation sessions initiated after save.
+                  </p>
                 </div>
               </div>
-              <div className="flex gap-3 mt-6">
+              <div className="flex gap-3 mt-8">
                 <button
                   onClick={() => setShowTimerModal(false)}
-                  className="flex-1 px-4 py-3 bg-slate-700 text-white font-semibold rounded-lg hover:bg-slate-600"
+                  className="flex-1 px-4 py-3 bg-muted text-foreground font-bold rounded-lg hover:bg-muted/80 transition"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={saveTimerDuration}
-                  className="flex-1 px-4 py-3 btn-investigate text-black font-bold rounded-lg"
+                  className="flex-1 px-4 py-3 bg-primary text-primary-foreground font-bold rounded-lg hover:bg-primary/90 shadow-lg shadow-primary/20 transition"
                 >
-                  Save
+                  Confirm Policy
                 </button>
               </div>
             </div>
@@ -548,24 +627,29 @@ export default function AdminDashboard() {
 
         {/* Delete All Users Confirmation Modal */}
         {showDeleteModal && (
-          <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-            <div className="evidence-card p-8 rounded-xl max-w-md w-full shadow-2xl bg-red-900/20 border-2 border-red-600">
-              <h3 className="text-2xl font-bold text-red-400 mb-4">Confirm Delete All Users</h3>
-              <p className="text-haze mb-6">
-                This action will permanently delete all {data.users.length} user records from the database. This cannot be undone.
+          <div className="fixed inset-0 bg-background/90 backdrop-blur-md z-50 flex items-center justify-center p-6 animate-fadeIn">
+            <div className="bg-destructive/10 border-2 border-destructive p-8 rounded-xl max-w-md w-full shadow-[0_0_50px_rgba(239,68,68,0.2)]">
+              <div className="text-center mb-6">
+                 <div className="text-5xl mb-4">☢</div>
+                 <h3 className="text-2xl font-bold text-destructive uppercase tracking-widest">Critical Warning</h3>
+              </div>
+              <p className="text-destructive-foreground text-center mb-8 font-medium">
+                You are about to execute a <span className="font-bold underline">complete database purge</span>. All {data.users.length} user records will be permanently erased.
+                <br/><br/>
+                This action is irreversible.
               </p>
-              <div className="flex gap-3">
+              <div className="flex gap-4">
                 <button
                   onClick={() => setShowDeleteModal(false)}
-                  className="flex-1 px-4 py-3 bg-slate-700 text-white font-semibold rounded-lg hover:bg-slate-600"
+                  className="flex-1 px-4 py-3 bg-background border border-border text-foreground font-bold rounded-lg hover:bg-muted transition"
                 >
-                  Cancel
+                  ABORT
                 </button>
                 <button
                   onClick={deleteAllUsers}
-                  className="flex-1 px-4 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700"
+                  className="flex-1 px-4 py-3 bg-destructive text-destructive-foreground font-bold rounded-lg hover:bg-destructive/90 shadow-lg shadow-destructive/20 transition animate-pulse"
                 >
-                  Delete All
+                  CONFIRM PURGE
                 </button>
               </div>
             </div>

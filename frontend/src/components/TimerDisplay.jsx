@@ -15,20 +15,27 @@ export default function TimerDisplay() {
   // Time's Up Modal
   if (isLoaded && (isExpired || gameStatus === "timeout")) {
     return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md animate-fadeIn">
-        <div className="evidence-card max-w-md w-full p-8 text-center border-red-500/50 shadow-[0_0_50px_rgba(220,38,38,0.5)]">
-          <div className="text-6xl mb-4">⏰</div>
-          <h2 className="text-4xl font-bold text-red-500 mb-4 font-mono tracking-widest">TIME'S UP</h2>
-          <p className="text-haze text-lg mb-8 leading-relaxed">
-            The investigation window has closed.<br/>
-            Your progress has been recorded.
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/95 backdrop-blur-xl animate-fadeIn p-6">
+        <div className="absolute inset-0 z-0 opacity-20 fingerprint-bg mix-blend-overlay"></div>
+        <div className="max-w-md w-full bg-card border-2 border-destructive p-10 rounded-xl shadow-[0_0_100px_rgba(239,68,68,0.5)] text-center relative overflow-hidden">
+          {/* Decorative scanner line */}
+          <div className="absolute top-0 left-0 w-full h-1 bg-destructive animate-[scan_2s_linear_infinite]"></div>
+          
+          <div className="text-6xl mb-6 animate-pulse">⏰</div>
+          <h1 className="text-5xl font-bold text-destructive mb-2 tracking-widest font-mono">TERMINATED</h1>
+          <div className="h-1 w-24 bg-destructive mx-auto mb-6"></div>
+          
+          <p className="text-destructive-foreground mb-8 leading-relaxed font-mono">
+            INVESTIGATION WINDOW CLOSED.<br/>
+            MISSION STATUS: <span className="font-bold">INCOMPLETE</span>
           </p>
           
           <button 
             onClick={handleLogout}
-            className="w-full py-4 bg-red-900/40 border border-red-500/50 text-red-400 hover:bg-red-800/40 hover:text-white transition-all font-mono font-bold tracking-wider rounded uppercase"
+            className="w-full py-4 bg-destructive/10 border border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all duration-300 font-mono font-bold tracking-widest rounded uppercase shadow-lg shadow-destructive/20 relative overflow-hidden group"
           >
-            End Session & Logout
+            <span className="relative z-10">ACKNOWLEDGE & LOGOUT</span>
+            <div className="absolute inset-0 bg-destructive transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
           </button>
         </div>
       </div>
@@ -39,7 +46,7 @@ export default function TimerDisplay() {
   if (!isLoaded) {
     return (
       <div className="fixed top-6 right-6 z-50">
-        <div className="px-6 py-3 rounded-lg font-mono text-xl font-bold bg-black/60 text-haze border border-white/20 animate-pulse">
+        <div className="px-6 py-3 rounded-lg font-mono text-xl font-bold bg-background/80 text-primary border border-primary/50 animate-pulse shadow-[0_0_15px_rgba(255,59,59,0.3)]">
           SYNCING...
         </div>
       </div>
@@ -60,13 +67,14 @@ export default function TimerDisplay() {
   return (
     <div className="fixed top-6 right-6 z-50">
       <div 
-        className={`px-6 py-3 rounded-lg font-mono text-xl font-bold border backdrop-blur-sm transition-all duration-300 ${
+        className={`px-6 py-3 rounded-lg font-mono text-xl font-bold border backdrop-blur-md transition-all duration-500 flex items-center gap-3 ${
           isRed 
-            ? 'bg-red-900/80 text-red-100 border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.5)] animate-pulse' 
-            : 'bg-green-900/80 text-green-300 border-green-500/50 shadow-lg'
+            ? 'bg-destructive/20 text-destructive border-destructive shadow-[0_0_20px_rgba(239,68,68,0.6)] animate-pulse' 
+            : 'bg-background/80 text-foreground border-primary/50 shadow-[0_0_15px_rgba(255,59,59,0.2)]'
         }`}
       >
-        {hours.toString().padStart(2, '0')}:{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
+        <span className={`w-2 h-2 rounded-full ${isRed ? 'bg-destructive' : 'bg-green-500 animate-pulse'}`}></span>
+        {hours > 0 ? `${hours.toString().padStart(2, '0')}:` : ''}{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
       </div>
     </div>
   );
