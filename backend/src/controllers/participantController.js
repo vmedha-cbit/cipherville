@@ -4,6 +4,7 @@ import { Officer } from "../models/Officer.js";
 import { Story } from "../models/Story.js";
 import { User } from "../models/User.js";
 import { GameState } from "../models/GameState.js";
+import { GameConfig } from "../models/GameConfig.js";
 import { logEvent } from "../services/logService.js";
 import { getPuzzleConfig } from "../utils/puzzleConfigs.js";
 
@@ -79,18 +80,35 @@ export const assignOfficer = async (req, res, next) => {
       return res.json({ officer });
     }
     
+
     // Assign a random officer
     const officers = await Officer.find();
     if (!officers.length) {
       return res.status(400).json({ error: "No officers configured" });
     }
+
+    // FETCH DYNAMIC TIMER DURATION FROM CONFIG
+    let timerDuration = 1800; 
+    try {
+        const config = await GameConfig.findOne({ configKey: "timer-duration" });
+        if (config && typeof config.timerDuration === 'number') {
+            timerDuration = config.timerDuration;
+        }
+    } catch (e) {
+        console.error("Config fetch error:", e);
+    }
+    
+    // Log for debugging
+    console.log(`Assigning officer to ${user.rollNumber || user.rollNo}. Using duration: ${timerDuration}s`);
     
     const picked = officers[Math.floor(Math.random() * officers.length)];
     user.assignedOfficer = picked._id;
     user.phase = "phase1";
     user.currentPhase = 1; // NUMBER, not string
     user.currentSubphase = 1;
+    user.timerDuration = timerDuration; // Set user-specific duration
     await user.save();
+
 
     // Initialize game state on phase1
     await GameState.findOneAndUpdate(
@@ -99,7 +117,7 @@ export const assignOfficer = async (req, res, next) => {
         userId: user._id,
         status: "started",
         startTime: new Date(),
-        duration: 1800
+        duration: timerDuration 
       },
       { upsert: true, new: true }
     );
@@ -575,24 +593,36 @@ export const getGameStatus = async (req, res, next) => {
     const user = req.user;
     const gameState = await GameState.findOne({ userId: user._id });
     
+    // Check config for dynamic default
+    let defaultDuration = 1800;
+    try {
+        const config = await GameConfig.findOne({ configKey: "timer-duration" });
+        if (config?.timerDuration) {
+            defaultDuration = config.timerDuration;
+        }
+    } catch(e) {}
+
     if (!gameState) {
       return res.json({
         status: "not_started",
         startTime: null,
-        duration: 1800,
-        timeRemaining: 1800
+        duration: defaultDuration,
+        timeRemaining: defaultDuration
       });
     }
 
     const now = new Date();
     const elapsed = Math.floor((now - gameState.startTime) / 1000);
-    const timeRemaining = Math.max(0, gameState.duration - elapsed);
+    // Use stored duration or fallback to config default
+    const currentDuration = gameState.duration || defaultDuration;
+    const timeRemaining = Math.max(0, currentDuration - elapsed);
 
     res.json({
       status: gameState.status,
       startTime: gameState.startTime,
-      duration: gameState.duration,
+      duration: currentDuration,
       timeRemaining,
+      serverTime: now, // Critical for sync
       isExpired: timeRemaining === 0
     });
   } catch (err) {

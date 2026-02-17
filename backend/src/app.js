@@ -11,6 +11,7 @@ import participantRoutes from "./routes/participantRoutes.js";
 import storyRoutes from "./routes/storyRoutes.js";
 import sqlRoutes from "./routes/sqlRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
+import publicRoutes from "./routes/publicRoutes.js";
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use("/api/participants", participantRoutes);
 app.use("/api/stories", storyRoutes);
 app.use("/api/sql", sqlRoutes);
 app.use("/api/uploads", uploadRoutes);
+app.use("/api/public", publicRoutes);
 
 app.use(errorHandler);
 

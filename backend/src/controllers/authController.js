@@ -30,7 +30,8 @@ export const getProgress = async (req, res, next) => {
       completedAt: user.completedAt,
       sessionActive: user.sessionActive,
       phase1YearRevealed: user.phase1YearRevealed,
-      phase1Year: user.phase1Year
+      phase1Year: user.phase1Year,
+      otpVerified: user.otpVerified
     });
   } catch (err) {
     next(err);
@@ -67,15 +68,26 @@ export const participantLogin = async (req, res, next) => {
     if (!user) {
       const sessionToken = jwt.sign({ userId: rollNo, ts: now.getTime() }, env.JWT_SECRET, { expiresIn: "6h" });
       
+      // Fetch dynamic timer duration
+      let timerDuration = 1800;
+      try {
+        const config = await GameConfig.findOne({ configKey: "timer-duration" });
+        if (config && config.timerDuration) {
+           timerDuration = config.timerDuration;
+        }
+      } catch (e) { console.error(e); }
+
       user = await User.create({
         rollNo,
         displayName,
         sessionActive: true,
         activeSession: sessionToken,
-        startedAt: now,
-        gameStartedAt: now,
-        timerDuration: 1800,
-        gameStatus: "playing",
+        otpVerified: false,
+        gameStatus: "awaiting_otp", // Wait for OTP
+        // Ensure startedAt is NULL so timer doesn't start
+        startedAt: null,
+        gameStartedAt: null,
+        timerDuration: timerDuration,
         completedAt: null,
         currentPhase: 1,
         currentSubphase: 1,
@@ -92,23 +104,11 @@ export const participantLogin = async (req, res, next) => {
       
       await user.save();
       
-      // Initialize GameState
-      const { GameState } = await import("../models/GameState.js");
-      await GameState.findOneAndUpdate(
-        { userId: user._id },
-        {
-          userId: user._id,
-          status: "started",
-          startTime: now,
-          duration: 1800
-        },
-        { upsert: true, new: true }
-      );
-      
       return res.json({
         status: "new-session",
         userId: user._id,
         sessionToken,
+        otpVerified: false,
         lastVisitedRoute: "/officer"
       });
     }
@@ -122,13 +122,7 @@ export const participantLogin = async (req, res, next) => {
       });
     }
 
-    // Check if game is timeout/expired (optional, depending on requirements, but user said 'after 30 mins... local progress cleared')
-    // If we want to strictly enforce 30 mins from start:
-    // const elapsed = (now - user.startedAt) / 1000;
-    // if (elapsed > 1800) { ... handle timeout ... }
-    
-    // RESUME SESSION (Whether sessionActive was true or false)
-    // We always generate a new token to ensure validity, but we KEEP the progress.
+    // RESUME SESSION
     const sessionToken = jwt.sign({ userId: user._id, ts: now.getTime() }, env.JWT_SECRET, { expiresIn: "6h" });
     
     // Ensure officer is assigned (recovery)
@@ -149,9 +143,71 @@ export const participantLogin = async (req, res, next) => {
       status: "resume-session",
       userId: user._id,
       sessionToken,
+      otpVerified: user.otpVerified,
       lastVisitedRoute: user.lastVisitedRoute || "/officer"
     });
 
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const verifyOtp = async (req, res, next) => {
+  try {
+    const { otp } = req.body;
+    const user = req.user;
+    
+    if (!otp) return res.status(400).json({ error: "OTP required" });
+
+    // Get current OTP from config
+    const config = await GameConfig.findOne({ configKey: "timer-duration" });
+    const currentOtp = config?.currentOtp || "123456";
+
+    // Allow admin bypass or check strict equality
+    if (otp !== currentOtp) {
+        return res.status(401).json({ error: "Invalid OTP" });
+    }
+
+    user.otpVerified = true;
+    
+    // Start game if not already started
+    if (!user.gameStartedAt) {
+         const now = new Date();
+         user.startedAt = now;
+         user.gameStartedAt = now;
+         user.gameStatus = "playing";
+         
+         
+         // Use dynamic duration from config for game start
+         const gameDuration = config?.timerDuration || 1800;
+         user.timerDuration = gameDuration;
+
+         // Update GameState
+         const { GameState } = await import("../models/GameState.js");
+         await GameState.findOneAndUpdate(
+            { userId: user._id },
+            { 
+              userId: user._id,
+              status: "started", // playing
+              startTime: now,
+              duration: gameDuration
+            },
+            { upsert: true, new: true }
+         );
+    } else {
+         // Resume existing game, ensure status is playing
+         user.gameStatus = "playing";
+    }
+
+    await user.save();
+    
+    await logEvent("otp-verified", { userId: user._id });
+
+    res.json({ 
+        ok: true, 
+        message: "Game Unlocked", 
+        startedAt: user.gameStartedAt 
+    });
   } catch (err) {
     next(err);
   }

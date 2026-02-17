@@ -178,6 +178,22 @@ export default function AdminDashboard() {
     }
   };
 
+  const logoutAllUsers = async () => {
+    try {
+      if (!window.confirm("Are you sure you want to log out ALL users? They will be redirected to the login page immediately.")) {
+        return;
+      }
+      const { data } = await api.post("/admin/logout-all");
+      alert(data.message);
+    } catch (err) {
+      if (err.response?.status === 401) {
+        localStorage.removeItem("cipherville-admin-token");
+        navigate("/admin/login");
+      }
+      alert("Failed to logout users: " + (err.response?.data?.error || err.message));
+    }
+  };
+
   return (
     <div className="min-h-screen px-6 py-10 film-grain">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -231,15 +247,43 @@ export default function AdminDashboard() {
             </div>
           </div>
         )}
-        <div className="evidence-card p-5 rounded-xl flex flex-col md:flex-row md:items-center gap-3">
-          <p className="text-haze">Default Timer Duration:</p>
-          <span className="text-white font-bold">{timerDuration} minutes</span>
-          <button 
-            className="px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-500"
-            onClick={() => setShowTimerModal(true)}
-          >
-            Change Duration
-          </button>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="evidence-card p-5 rounded-xl flex flex-col gap-3">
+            <p className="text-haze">Default Timer Duration:</p>
+            <span className="text-white font-bold text-2xl">{timerDuration} minutes</span>
+            <button 
+              className="px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-500"
+              onClick={() => setShowTimerModal(true)}
+            >
+              Change Duration
+            </button>
+          </div>
+          
+          <div className="evidence-card p-5 rounded-xl flex flex-col gap-3">
+             <p className="text-haze">Session Access Code (OTP):</p>
+             <div className="flex items-center gap-3">
+                <span className="text-green-400 font-mono font-bold text-3xl tracking-widest bg-black/50 px-4 py-2 rounded">
+                    {data.currentOtp || "------"}
+                </span>
+                <button 
+                  onClick={async () => {
+                      const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+                      if (window.confirm(`Generate new OTP: ${newOtp}? This will update the access code for all new logins.`)) {
+                          try {
+                              await api.post("/admin/otp", { otp: newOtp });
+                              setData(prev => ({ ...prev, currentOtp: newOtp }));
+                          } catch (err) {
+                              alert("Failed to update OTP");
+                          }
+                      }
+                  }}
+                  className="px-4 py-3 bg-amber-600 text-black font-bold rounded-lg hover:bg-amber-500"
+                >
+                  ↻ Regenerate
+                </button>
+             </div>
+             <p className="text-xs text-haze">Users must enter this code after login to start game.</p>
+          </div>
         </div>
 
         {/* Error Display */}
@@ -313,6 +357,20 @@ export default function AdminDashboard() {
           </button>
         </div>
 
+        {/* User Management Actions */}
+        <div className="evidence-card p-5 rounded-xl bg-orange-900/20 border-2 border-orange-600/50 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div>
+                <p className="text-orange-400 font-semibold">Session Control</p>
+                <p className="text-orange-300 text-sm">Force logout all participants</p>
+            </div>
+            <button
+                className="px-6 py-3 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 whitespace-nowrap"
+                onClick={logoutAllUsers}
+            >
+                Log Out All Users
+            </button>
+        </div>
+
         {/* Participants List */}
         <div className="evidence-card p-6 rounded-xl">
           <h3 className="text-2xl font-bold text-amber-500 mb-4">Live Participant Tracking</h3>
@@ -347,7 +405,7 @@ export default function AdminDashboard() {
                     const timerColor = timer.isExpired ? 'text-red-400' : timer.isPanic ? 'text-yellow-400' : 'text-green-400';
                     return (
                       <tr key={user._id} className="border-b border-white/5 hover:bg-white/5">
-                        <td className="p-3 text-white font-mono">{user.rollNumber}</td>
+                        <td className="p-3 text-white font-mono">{user.rollNo || user.rollNumber}</td>
                         <td className="p-3 text-white">{user.displayName || '-'}</td>
                         <td className="p-3 text-haze">{user.phase || 'officer'}</td>
                         <td className={`p-3 font-mono font-bold ${timerColor}`}>
@@ -379,7 +437,7 @@ export default function AdminDashboard() {
             <div className="evidence-card p-8 rounded-xl max-w-2xl w-full shadow-2xl my-6">
               <div className="flex justify-between items-center mb-6 sticky top-0 bg-inherit z-10">
                 <h3 className="text-2xl font-bold text-amber-500">
-                  Participant Details: {selectedParticipant.rollNumber}
+                  Participant Details: {selectedParticipant.rollNo || selectedParticipant.rollNumber}
                 </h3>
                 <button
                   onClick={() => setSelectedParticipant(null)}
@@ -394,7 +452,7 @@ export default function AdminDashboard() {
                   <p className="text-amber-400 text-sm font-semibold">Basic Info</p>
                   <div className="mt-2 space-y-2">
                     <p className="text-white"><span className="text-haze">Name:</span> {selectedParticipant.displayName || 'N/A'}</p>
-                    <p className="text-white"><span className="text-haze">Roll Number:</span> {selectedParticipant.rollNumber}</p>
+                    <p className="text-white"><span className="text-haze">Roll Number:</span> {selectedParticipant.rollNo || selectedParticipant.rollNumber}</p>
                     <p className="text-white"><span className="text-haze">Current Phase:</span> {selectedParticipant.phase}</p>
                     <p className="text-white"><span className="text-haze">Type:</span> {getStatusBadge(selectedParticipant)}</p>
                     <p className="text-white"><span className="text-haze">Overall Completion Time:</span> {formatCompletionTime(selectedParticipant.completionTime)}</p>

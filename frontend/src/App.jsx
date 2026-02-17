@@ -1,5 +1,9 @@
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "./providers/authContext.jsx";
+import { useSocket } from "./providers/socketContext.jsx";
 import Login from "./pages/Login.jsx";
+import OtpEntry from "./pages/OtpEntry.jsx";
 import Officer from "./pages/Officer.jsx";
 import Phase1 from "./pages/Phase1.jsx";
 import QRArticle from "./pages/QRArticle.jsx";
@@ -27,9 +31,28 @@ import GuideWidget from "./components/GuideWidget.jsx";
 
 function AppContent() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    if (socket) {
+      const handleForceLogout = () => {
+        console.log("Received force-logout-all event");
+        logout();
+        navigate("/");
+        alert("Session terminated by administrator.");
+      };
+
+      socket.on("force-logout-all", handleForceLogout);
+      return () => socket.off("force-logout-all", handleForceLogout);
+    }
+  }, [socket, logout, navigate]);
+
   const isAdminPage = location.pathname.startsWith("/admin");
   const isLoginPage = location.pathname === "/";
-  const showHeader = !isAdminPage && !isLoginPage;
+  const isOtpPage = location.pathname === "/otp";
+  const showHeader = !isAdminPage && !isLoginPage && !isOtpPage;
 
   return (
     <>
@@ -41,6 +64,7 @@ function AppContent() {
       <div className={showHeader ? "pt-16" : ""}>
         <Routes>
           <Route path="/" element={<Login />} />
+          <Route path="/otp" element={<OtpEntry />} />
           <Route path="/officer" element={<ProtectedRoute><Officer /></ProtectedRoute>} />
           <Route path="/phase1" element={<ProtectedRoute><Phase1 /></ProtectedRoute>} />
           <Route path="/qr-article" element={<ProtectedRoute><QRArticle /></ProtectedRoute>} />

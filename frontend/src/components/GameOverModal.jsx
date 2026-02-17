@@ -50,10 +50,15 @@ export default function GameOverModal() {
             Better luck next time, detective. The mystery remains unsolved...
           </p>
           <button
-            onClick={() => navigate("/")}
-            className="px-8 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-all transform hover:scale-105 w-full"
+            onClick={() => {
+              // Clear session and go to login
+              // If useAuth has logout, use it, else generic
+              localStorage.removeItem("cipherville-session");
+              window.location.href = "/";
+            }}
+            className="px-8 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-all transform hover:scale-105 w-full uppercase tracking-widest"
           >
-            Return to Login
+            LOGOUT
           </button>
         </div>
       </div>

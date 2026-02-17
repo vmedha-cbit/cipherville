@@ -1,0 +1,185 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: #0b0f14;
+  --foreground: #e0e4ea;
+  --card: #121826;
+  --card-foreground: #e0e4ea;
+  --popover: #121826;
+  --popover-foreground: #e0e4ea;
+  --primary: #ff3b3b;
+  --primary-foreground: #ffffff;
+  --secondary: #00f5ff;
+  --secondary-foreground: #0b0f14;
+  --muted: #1a2233;
+  --muted-foreground: #6b7a90;
+  --accent: #00f5ff;
+  --accent-foreground: #0b0f14;
+  --destructive: #ff3b3b;
+  --destructive-foreground: #ffffff;
+  --border: #1e2a3a;
+  --input: #1e2a3a;
+  --ring: #ff3b3b;
+  --chart-1: #ff3b3b;
+  --chart-2: #00f5ff;
+  --chart-3: #1a2233;
+  --chart-4: #6b7a90;
+  --chart-5: #e0e4ea;
+  --radius: 0.5rem;
+  --sidebar: #0d1219;
+  --sidebar-foreground: #e0e4ea;
+  --sidebar-primary: #ff3b3b;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1a2233;
+  --sidebar-accent-foreground: #e0e4ea;
+  --sidebar-border: #1e2a3a;
+  --sidebar-ring: #ff3b3b;
+}
+
+@theme inline {
+  --font-sans: 'Geist', 'Geist Fallback', monospace;
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback', monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-cyan: #00f5ff;
+  --color-crime-red: #ff3b3b;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Fingerprint background pattern */
+.fingerprint-bg {
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(0, 245, 255, 0.02) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 50%, rgba(255, 59, 59, 0.02) 0%, transparent 50%);
+}
+
+/* Grid overlay */
+.grid-overlay {
+  background-image:
+    linear-gradient(rgba(30, 42, 58, 0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30, 42, 58, 0.3) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Scanline effect */
+.scanline {
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 245, 255, 0.03) 50%,
+    transparent 100%
+  );
+  background-size: 100% 4px;
+}
+
+/* Glowing border effect */
+.glow-red {
+  box-shadow: 0 0 8px rgba(255, 59, 59, 0.3), inset 0 0 8px rgba(255, 59, 59, 0.05);
+}
+
+.glow-cyan {
+  box-shadow: 0 0 8px rgba(0, 245, 255, 0.3), inset 0 0 8px rgba(0, 245, 255, 0.05);
+}
+
+/* Blinking cursor */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.cursor-blink {
+  animation: blink 1s step-end infinite;
+}
+
+/* Pulse glow */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Scanning animation */
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+.scan-line {
+  animation: scan 2s ease-in-out infinite;
+}
+
+/* Magnifying glass animation */
+@keyframes magnify {
+  0%, 100% { transform: rotate(-10deg) scale(1); }
+  25% { transform: rotate(5deg) scale(1.05); }
+  50% { transform: rotate(-5deg) scale(1.1); }
+  75% { transform: rotate(3deg) scale(1.05); }
+}
+
+.magnify-animate {
+  animation: magnify 3s ease-in-out infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0b0f14;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e2a3a;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2a3a4e;
+}

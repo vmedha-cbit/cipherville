@@ -3,6 +3,7 @@ import api from "../providers/api.js";
 import { useNavigate } from "react-router-dom";
 import { useTimer } from "../providers/timerContext.jsx";
 import SQLGuide from "../components/SQLGuide.jsx";
+import TimerDisplay from "../components/TimerDisplay.jsx";
 
 export default function Phase2() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export default function Phase2() {
   const [queryError, setQueryError] = useState("");
   const [loadingQuestions, setLoadingQuestions] = useState(false);
   const [progressSaved, setProgressSaved] = useState(false);
+  const [submissionStatus, setSubmissionStatus] = useState({}); // { [questionId]: 'correct' | 'incorrect' }
 
   const storyId = useMemo(() => story?.sqliteTemplateId || story?._id, [story]);
   const allCorrect = questions.length > 0 && correctIds.length === questions.length;
@@ -96,9 +98,6 @@ export default function Phase2() {
     }
   }, [allCorrect, progressSaved, pauseTimer]);
 
-  // Note: Do NOT auto-redirect - let user click the button in congratulations modal
-  // This allows admin to update in real-time while user sees congratulations
-
   // Handle timeout - save progress
   useEffect(() => {
     if (isExpired) {
@@ -124,14 +123,25 @@ export default function Phase2() {
   };
 
   const submitAnswer = async (questionId) => {
+    // Clear previous status for this question
+    setSubmissionStatus(prev => ({ ...prev, [questionId]: null }));
     setError("");
+    
     try {
       const { data } = await api.post("/participants/phase2/answer", {
         questionId,
         answer: answers[questionId] || ""
       });
+      
       if (data.correct) {
         setCorrectIds((prev) => Array.from(new Set([...prev, String(questionId)])));
+        setSubmissionStatus(prev => ({ ...prev, [questionId]: 'correct' }));
+      } else {
+        setSubmissionStatus(prev => ({ ...prev, [questionId]: 'incorrect' }));
+        // Also clear incorrect status after 3 seconds
+        setTimeout(() => {
+             setSubmissionStatus(prev => ({ ...prev, [questionId]: null }));
+        }, 3000);
       }
     } catch (err) {
       setError(err.response?.data?.error || "Answer check failed");
@@ -143,14 +153,7 @@ export default function Phase2() {
       <SQLGuide />
       <div className="film-grain" />
       
-      {/* Timer Display */}
-      <div className="fixed top-6 right-6 z-50">
-        <div className={`px-6 py-3 rounded-lg font-mono text-xl font-bold ${
-          timeRemaining > 0 ? 'bg-green-900/60 text-green-300' : 'bg-red-900/60 text-red-300'
-        } border ${timeRemaining > 0 ? 'border-green-500/50' : 'border-red-500/50'}`}>
-          {Math.floor(timeRemaining / 3600).toString().padStart(2, '0')}:{Math.floor((timeRemaining % 3600) / 60).toString().padStart(2, '0')}:{(timeRemaining % 60).toString().padStart(2, '0')}
-        </div>
-      </div>
+      <TimerDisplay />
 
       {/* Main Content - Always rendered */}
       <div className="min-h-screen px-6 py-10">
@@ -169,18 +172,25 @@ export default function Phase2() {
             {officer?.name && <p className="text-sm text-haze mt-2">Assigned Officer: {officer.name}</p>}
           </div>
 
+          {/* Intro & Start */}
+          {!started && (
+              <div className="evidence-card p-8 text-center border border-amber-500/30 bg-black/40">
+                  <p className="text-xl text-amber-100 mb-6 font-mono">
+                      "Now solve this case by querying the database evidence."
+                  </p>
+                  <button
+                      className="btn-investigate px-8 py-4 text-lg font-bold shadow-lg shadow-amber-900/20 transform hover:scale-105 transition-all"
+                      onClick={() => setStarted(true)}
+                  >
+                      START INVESTIGATION
+                  </button>
+              </div>
+          )}
+
           {/* Schema Card */}
           <div className="evidence-card p-6">
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-semibold">Database Schema</h3>
-              {!started && (
-                <button
-                  className="btn-investigate px-5 py-2"
-                  onClick={() => setStarted(true)}
-                >
-                  Start Investigation
-                </button>
-              )}
             </div>
             <div className="grid md:grid-cols-2 gap-6 mt-4">
               <div className="bg-ink/70 rounded-lg border border-white/10 p-4">
@@ -236,30 +246,52 @@ export default function Phase2() {
                 <div className="space-y-4">
                   {questions.map((q, idx) => {
                     const isCorrect = correctIds.includes(String(q.id));
+                    const status = submissionStatus[q.id];
+                    
                     return (
-                      <div key={q.id} className="bg-ink/70 border border-white/10 rounded-lg p-4">
+                      <div key={q.id} className={`bg-ink/70 border ${status === 'incorrect' ? 'border-red-500 animate-pulse' : 'border-white/10'} rounded-lg p-4 transition-all duration-300`}>
                         <p className="text-white font-semibold">Q{idx + 1}. {q.prompt}</p>
                         <div className="mt-3 flex gap-2">
                           <input
-                            className="flex-1 p-2 bg-black/60 border border-white/10 rounded text-white"
+                            className={`flex-1 p-2 bg-black/60 border ${status === 'incorrect' ? 'border-red-500 text-red-300' : 'border-white/10 text-white'} rounded transition-colors`}
                             placeholder="Type your answer"
                             value={answers[q.id] || ""}
-                            onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                            onChange={(e) => {
+                                setAnswers({ ...answers, [q.id]: e.target.value });
+                                if (submissionStatus[q.id]) {
+                                    setSubmissionStatus(prev => ({ ...prev, [q.id]: null }));
+                                }
+                            }}
                             disabled={isCorrect}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" && !isCorrect) {
+                                    submitAnswer(q.id);
+                                }
+                            }}
                           />
                           <button
-                            className="px-4 py-2 bg-ember text-black font-semibold rounded disabled:opacity-50"
+                            className={`px-4 py-2 font-semibold rounded disabled:opacity-50 transition-all ${
+                                isCorrect 
+                                    ? "bg-emerald-600 text-white" 
+                                    : status === 'incorrect' 
+                                        ? "bg-red-600 text-white" 
+                                        : "bg-ember text-black"
+                            }`}
                             onClick={() => submitAnswer(q.id)}
                             disabled={isCorrect}
                           >
-                            {isCorrect ? "Correct ✓" : "Check"}
+                            {isCorrect ? "Correct ✓" : status === 'incorrect' ? "Wrong ✖" : "Check"}
                           </button>
                         </div>
+                        {status === 'incorrect' && (
+                            <p className="text-red-400 text-xs mt-2 font-bold animate-bounce">
+                                ⚠ Incorrect answer. Try again.
+                            </p>
+                        )}
                       </div>
                     );
                   })}
                 </div>
-                {error && <p className="text-ember text-sm mt-3">{error}</p>}
               </div>
 
               <div className="evidence-card p-6">

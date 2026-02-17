@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import { useAuth } from "./authContext.jsx";
 import api from "./api.js";
 
@@ -21,6 +21,48 @@ export const TimerProvider = ({ children }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [gameStatus, setGameStatus] = useState("playing"); // playing, completed, timeout
   const [isPaused, setIsPaused] = useState(false);
+  
+  // Ref to track server time offset (Server Time - Local Time)
+  const serverTimeOffset = useRef(0);
+
+  // Define fetchTimer at component level
+  const fetchTimer = useCallback(async () => {
+    if (!session?.userId || !session?.sessionToken) return;
+
+    try {
+      const { data } = await api.get(`/participants/game/status`);
+      
+      if (data.serverTime) {
+        const serverTime = new Date(data.serverTime).getTime();
+        const localTime = Date.now();
+        serverTimeOffset.current = serverTime - localTime;
+      }
+
+      if (data.startTime) {
+        const startTime = new Date(data.startTime);
+        setGameStartedAt(startTime);
+        setTimerDuration(data.duration);
+        setGameStatus(data.status || "started");
+        
+        if (data.isExpired) {
+          setIsExpired(true);
+          setTimeRemaining(0);
+        } else {
+          // Initial calc
+          const now = Date.now() + serverTimeOffset.current;
+          const elapsed = Math.floor((now - startTime.getTime()) / 1000);
+          const currentDuration = data.duration; 
+          if (!currentDuration) console.warn("Timer duration missing from backend!");
+          const remaining = Math.max(0, (currentDuration || 1800) - elapsed);
+          setTimeRemaining(remaining);
+        }
+      }
+      setIsLoaded(true);
+    } catch (err) {
+      console.error("Timer load error:", err);
+      setIsLoaded(true);
+    }
+  }, [session?.userId, session?.sessionToken]);
 
   // Load timer on session change
   useEffect(() => {
@@ -33,35 +75,10 @@ export const TimerProvider = ({ children }) => {
       return;
     }
 
-    // Small delay to ensure headers are attached
-    const timer = setTimeout(async () => {
-      try {
-        const { data } = await api.get(`/participants/game/status`);
-        
-        if (data.startTime) {
-          const startTime = new Date(data.startTime);
-          setGameStartedAt(startTime);
-          setTimerDuration(data.duration || 1800);
-          setGameStatus(data.status || "started");
-          
-          const remaining = Math.max(0, data.timeRemaining || 0);
-          setTimeRemaining(remaining);
-          
-          if (data.isExpired) {
-            setIsExpired(true);
-          }
-        }
-        setIsLoaded(true);
-      } catch (err) {
-        console.error("Timer load error:", err);
-        setIsLoaded(true);
-      }
-    }, 100); // Wait 100ms for headers to attach
+    fetchTimer();
+  }, [session?.userId, session?.sessionToken, fetchTimer]);
 
-    return () => clearTimeout(timer);
-  }, [session?.userId, session?.sessionToken]);
-
-  // Countdown timer with periodic server sync
+  // Countdown timer
   useEffect(() => {
     if (!gameStartedAt || !session?.userId || !session?.sessionToken) return;
     
@@ -69,21 +86,10 @@ export const TimerProvider = ({ children }) => {
       return;
     }
 
-    // Force update on visibility change (fix for "stuck" timer after backgrounding)
-    const handleVisibilityChange = () => {
-      if (!document.hidden && gameStartedAt) {
-        const now = new Date();
-        const elapsed = Math.floor((now - gameStartedAt) / 1000);
-        const remaining = Math.max(0, timerDuration - elapsed);
-        setTimeRemaining(remaining);
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    const countDown = setInterval(() => {
-      const now = new Date();
-      const elapsed = Math.floor((now - gameStartedAt) / 1000);
+    const updateTimer = () => {
+      const now = Date.now() + serverTimeOffset.current;
+      const startTime = new Date(gameStartedAt).getTime();
+      const elapsed = Math.floor((now - startTime) / 1000);
       const remaining = Math.max(0, timerDuration - elapsed);
 
       setTimeRemaining(remaining);
@@ -91,42 +97,27 @@ export const TimerProvider = ({ children }) => {
       if (remaining === 0) {
         setIsExpired(true);
         setGameStatus("timeout");
-        clearInterval(countDown);
+        // Notify backend about timeout
+        api.post('/participants/end-game', { reason: 'timeout' }).catch(e => console.error("Timeout sync failed", e));
       }
-    }, 1000);
+    };
 
-    // Initial calculation
-    handleVisibilityChange();
+    // Update immediately
+    updateTimer();
 
-    // Sync with server every 5 seconds to detect desync or completion
+    const interval = setInterval(updateTimer, 1000);
+
+    // Sync with server every 10 seconds to correct drift
     const syncInterval = setInterval(async () => {
-      // Don't sync if tab is hidden to save bandwidth
       if (document.hidden) return;
-
-      try {
-        const { data } = await api.get(`/participants/game/status`);
-        if (data.startTime) {
-          const serverStartTime = new Date(data.startTime);
-          // Only update if significantly different (>2s) to avoid jitter
-          if (Math.abs(serverStartTime - gameStartedAt) > 2000) {
-             setGameStartedAt(serverStartTime);
-          }
-          setGameStatus(data.status || "started");
-          if (data.isExpired) {
-            setIsExpired(true);
-          }
-        }
-      } catch (err) {
-        console.error("Sync error:", err);
-      }
-    }, 5000);
+      await fetchTimer();
+    }, 10000);
 
     return () => {
-      clearInterval(countDown);
+      clearInterval(interval);
       clearInterval(syncInterval);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [gameStartedAt, timerDuration, gameStatus, isExpired, isPaused, session?.userId, session?.sessionToken]);
+  }, [gameStartedAt, timerDuration, gameStatus, isExpired, isPaused, session?.userId, session?.sessionToken, fetchTimer]);
 
   const value = {
     timeRemaining,
@@ -138,10 +129,12 @@ export const TimerProvider = ({ children }) => {
     isPanic: timeRemaining > 0 && timeRemaining <= 300,
     getElapsedTime: useCallback(() => {
       if (!gameStartedAt) return 0;
-      return Math.floor((new Date() - gameStartedAt) / 1000);
+      const now = Date.now() + serverTimeOffset.current;
+      return Math.floor((now - new Date(gameStartedAt).getTime()) / 1000);
     }, [gameStartedAt]),
     pauseTimer: () => setIsPaused(true),
     resumeTimer: () => setIsPaused(false),
+    refreshTimer: fetchTimer, // Exposed here
     isPaused
   };
 

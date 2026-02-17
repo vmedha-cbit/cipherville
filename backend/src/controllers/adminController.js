@@ -48,7 +48,7 @@ export const deleteOfficer = async (req, res, next) => {
 export const dashboard = async (req, res, next) => {
   try {
     const [users, stories, officers] = await Promise.all([
-      User.find().sort({ createdAt: -1 }).select("rollNumber displayName phase gameStatus gameStartedAt timerDuration completedAt startedAt progressTracking attempts"),
+      User.find().sort({ createdAt: -1 }).select("rollNo rollNumber displayName phase gameStatus gameStartedAt timerDuration completedAt startedAt progressTracking attempts"),
       Story.find().sort({ createdAt: -1 }).limit(10),
       Officer.find().sort({ createdAt: -1 }).limit(10)
     ]);
@@ -90,11 +90,52 @@ export const dashboard = async (req, res, next) => {
       return userObj;
     });
     
-    res.json({ users: usersWithTimer, stories, officers });
+    
+    const [config] = await Promise.all([
+      GameConfig.findOne({ configKey: "timer-duration" })
+    ]);
+    
+    // Default OTP if not set
+    const currentOtp = config?.currentOtp || "123456";
+
+    res.json({ users: usersWithTimer, stories, officers, currentOtp });
   } catch (err) {
     next(err);
   }
 };
+
+export const deleteUser = async (req, res, next) => {
+  try {
+     const { userId } = req.params;
+     const result = await User.findByIdAndDelete(userId);
+     if (!result) return res.status(404).json({ error: "User not found" });
+     res.json({ ok: true, message: "User deleted" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateOtp = async (req, res, next) => {
+  try {
+    const { otp } = req.body;
+    // Update or create config
+    let config = await GameConfig.findOne({ configKey: "timer-duration" });
+    if (!config) {
+      config = await GameConfig.create({
+        configKey: "timer-duration",
+        timerDuration: 1800,
+        currentOtp: otp
+      });
+    } else {
+      config.currentOtp = otp;
+      await config.save();
+    }
+    res.json({ ok: true, currentOtp: otp });
+  } catch (err) {
+    next(err);
+  }
+};
+
 
 export const seedOfficers = async (req, res, next) => {
   try {
@@ -304,7 +345,7 @@ export const getFastestSolvers = async (req, res, next) => {
       startedAt: { $ne: null }
     })
       .populate("phase2Story", "title")
-      .select("rollNumber displayName phase2Story startedAt completedAt");
+      .select("rollNo rollNumber displayName phase2Story startedAt completedAt");
 
     // Calculate completion time and prepare data
     const solvers = completedUsers
@@ -312,7 +353,7 @@ export const getFastestSolvers = async (req, res, next) => {
         const completionTime = new Date(user.completedAt) - new Date(user.startedAt);
         return {
           _id: user._id,
-          rollNumber: user.rollNumber,
+          rollNumber: user.rollNo || user.rollNumber,
           displayName: user.displayName,
           storyTitle: user.phase2Story?.title || "Unknown",
           startedAt: user.startedAt,
@@ -376,6 +417,33 @@ export const deleteAllUsers = async (req, res, next) => {
       ok: true, 
       message: `${result.deletedCount} user records deleted successfully`
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const logoutAllUsers = async (req, res, next) => {
+  try {
+    // 1. Invalidate all sessions in DB
+    const result = await User.updateMany({}, { 
+      $set: { 
+        activeSession: null,
+        sessionActive: false 
+      }
+    });
+
+    // 2. Emit socket event
+    try {
+      const { getIO } = await import("../socket/index.js");
+      const io = getIO();
+      if (io) {
+        io.emit("force-logout-all");
+      }
+    } catch (err) {
+      console.error("Socket emit failed:", err);
+    }
+
+    res.json({ ok: true, message: "All users logged out successfully", count: result.modifiedCount });
   } catch (err) {
     next(err);
   }

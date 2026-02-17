@@ -8,6 +8,7 @@ export default function RouteChallenge() {
   const routeId = searchParams.get("routeId");
   const correctAnswer = searchParams.get("answer");
   const year = searchParams.get("year");
+  const jumbledWord = searchParams.get("jumbled");
 
   const [userAnswer, setUserAnswer] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -48,7 +49,13 @@ export default function RouteChallenge() {
               <h2 className="text-4xl font-bold bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600 bg-clip-text text-transparent mb-4">
                 Route {routeId}: Secure Access
               </h2>
-              <p className="text-haze">To access this route's information, enter the unscrambled word:</p>
+              <p className="text-haze mb-4">To access this route's information, unscramble the word:</p>
+              
+              <div className="inline-block bg-black/50 border border-amber-500/30 px-6 py-3 rounded mb-4">
+                <span className="text-2xl font-mono tracking-[0.5em] text-amber-400 font-bold uppercase">
+                    {jumbledWord}
+                </span>
+              </div>
             </div>
 
             {/* Answer Input */}

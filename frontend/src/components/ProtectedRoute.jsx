@@ -29,13 +29,17 @@ export default function ProtectedRoute({ children }) {
     return <Navigate to="/" replace />;
   }
   if (loading) {
-    return null; // Show nothing while loading
+    return <div className="flex h-screen items-center justify-center bg-black text-green-500 font-mono">Loading Security Protocol...</div>; 
   }
+
+  // Redirect to OTP if not verified
+  if (progress && !progress.otpVerified) {
+    return <Navigate to="/otp" replace />;
+  }
+
   if (progress?.completedAt) {
-    return <Navigate to="/" replace />; // Game completed, go to login
+    return <Navigate to="/" replace />; // Game completed or timed out
   }
   
-  // Allow navigation - don't block based on lastVisitedRoute
-  // The backend progress tracks where the user has been
   return children;
 }

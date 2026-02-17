@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../providers/api.js";
-import { useTimer } from "../providers/timerContext.jsx";
+import TimerDisplay from "../components/TimerDisplay.jsx";
 
 export default function Officer() {
   const navigate = useNavigate();
-  const { timeRemaining, gameStartedAt } = useTimer();
   const [officer, setOfficer] = useState(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -75,14 +74,7 @@ export default function Officer() {
     <div className="min-h-screen relative">
       <div className="film-grain" />
       
-      {/* Timer Display */}
-      <div className="fixed top-6 right-6 z-50">
-        <div className={`px-6 py-3 rounded-lg font-mono text-xl font-bold ${
-          gameStartedAt ? 'bg-green-900/60 text-green-300' : 'bg-gray-900/60 text-gray-300'
-        } border ${gameStartedAt ? 'border-green-500/50' : 'border-gray-500/50'}`}>
-          {gameStartedAt ? formatTime(timeRemaining) : 'Loading timer...'}
-        </div>
-      </div>
+      <TimerDisplay />
 
       {/* Main Content */}
       <div className="min-h-screen flex items-center justify-center px-6 py-10">

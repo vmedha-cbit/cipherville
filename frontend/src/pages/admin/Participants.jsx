@@ -33,16 +33,28 @@ export default function Participants() {
     return () => clearInterval(interval);
   }, []);
 
-  // Update timer status locally (optional, or just use static data)
-  useEffect(() => {
-    const status = {};
-    participants.forEach((user) => {
-        if (user.timeRemaining !== null && user.timeRemaining !== undefined) {
-         status[user._id] = { remaining: user.timeRemaining };
-        }
-    });
-    setTimerStatus(status);
-  }, [participants]);
+  // Sort participants: Completed (fastest first) -> Playing -> Others
+  const sortedParticipants = [...participants].sort((a, b) => {
+      // If both completed, sort by completionTime
+      if (a.completionTime && b.completionTime) return a.completionTime - b.completionTime;
+      // If a completed, comes first
+      if (a.completionTime) return -1;
+      if (b.completionTime) return 1;
+      // If both playing, sort by startedAt (earliest first)
+      return new Date(a.startedAt || 0) - new Date(b.startedAt || 0);
+  });
+
+  const handleDelete = async (e, userId) => {
+      e.stopPropagation();
+      if (!window.confirm("Delete this user permanently? This cannot be undone.")) return;
+      try {
+          await api.delete(`/admin/users/${userId}`);
+          setParticipants(prev => prev.filter(p => p._id !== userId));
+      } catch (err) {
+          console.error("Delete failed:", err);
+          alert("Failed to delete user");
+      }
+  };
 
   const formatTime = (seconds) => {
     if (seconds == null) return 'N/A';
@@ -67,19 +79,15 @@ export default function Participants() {
     return <span className="bg-blue-900/30 text-blue-400 px-2 py-1 rounded text-xs font-bold">PLAYING</span>;
   };
 
+  // ... (rest of logic) ...
+
   return (
     <div className="min-h-screen px-6 py-10 film-grain">
       <div className="max-w-7xl mx-auto space-y-6">
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-500 to-orange-600 bg-clip-text text-transparent">
-          Participants
-        </h2>
-        <AdminNav />
-
-        {loading ? (
-             <div className="flex justify-center p-12">
-                <DetectiveLoading text="Gathering suspects..." />
-             </div>
-        ) : (
+        {/* ... Header ... */}
+        {/* ... Loading ... */}
+        
+        {!loading && (
           <div className="evidence-card p-6 rounded-xl">
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -89,11 +97,12 @@ export default function Participants() {
                     <th className="text-left p-3 text-amber-400 font-semibold">Name</th>
                     <th className="text-left p-3 text-amber-400 font-semibold">Status</th>
                     <th className="text-left p-3 text-amber-400 font-semibold">Phase</th>
-                    <th className="text-left p-3 text-amber-400 font-semibold">Completion Time</th>
+                    <th className="text-left p-3 text-amber-400 font-semibold">Time</th>
+                    <th className="text-right p-3 text-amber-400 font-semibold">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {participants.map((user) => (
+                  {sortedParticipants.map((user) => (
                     <tr 
                         key={user._id} 
                         className="border-b border-white/5 hover:bg-white/10 cursor-pointer transition-colors"
@@ -106,16 +115,25 @@ export default function Participants() {
                       <td className="p-3 text-emerald-400 font-mono">
                           {formatCompletionTime(user.completionTime)}
                       </td>
+                      <td className="p-3 text-right">
+                          <button 
+                             onClick={(e) => handleDelete(e, user._id)}
+                             className="text-red-400 hover:text-red-300 hover:bg-red-900/30 px-3 py-1 rounded text-xs font-bold border border-red-500/30"
+                          >
+                            DELETE
+                          </button>
+                      </td>
                     </tr>
                   ))}
                   {participants.length === 0 && (
-                      <tr><td colSpan="5" className="p-6 text-center text-haze">No participants data found.</td></tr>
+                      <tr><td colSpan="6" className="p-6 text-center text-haze">No participants data found.</td></tr>
                   )}
                 </tbody>
               </table>
             </div>
           </div>
         )}
+
 
         {/* DETAILS MODAL */}
         {selectedParticipant && (

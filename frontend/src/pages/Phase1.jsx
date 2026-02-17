@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../providers/api.js";
 import { getPuzzleConfig } from "../data/puzzleConfigs.js";
 import { useTimer } from "../providers/timerContext.jsx";
+import TimerDisplay from "../components/TimerDisplay.jsx";
 
 export default function Phase1() {
 	const navigate = useNavigate();
@@ -232,14 +233,7 @@ export default function Phase1() {
 		<div className="min-h-screen relative">
 			<div className="film-grain" />
 			
-			{/* Timer Display */}
-			<div className="fixed top-6 right-6 z-50">
-				<div className={`px-6 py-3 rounded-lg font-mono text-xl font-bold ${
-					timeRemaining > 0 ? 'bg-green-900/60 text-green-300' : 'bg-red-900/60 text-red-300'
-				} border ${timeRemaining > 0 ? 'border-green-500/50' : 'border-red-500/50'}`}>
-					{Math.floor(timeRemaining / 3600).toString().padStart(2, '0')}:{Math.floor((timeRemaining % 3600) / 60).toString().padStart(2, '0')}:{(timeRemaining % 60).toString().padStart(2, '0')}
-				</div>
-			</div>
+      <TimerDisplay />
 
 			<div className="min-h-screen px-6 py-10">
 				<div className="max-w-4xl mx-auto space-y-8">
@@ -487,7 +481,7 @@ export default function Phase1() {
 
 				{/* Jumbled Word Display */}
 				<div className="text-center mb-10">
-					<p className="text-haze text-sm mb-3">🔤 SQL-Related Jumbled Word:</p>
+					<p className="text-haze text-sm mb-3">🔤 Jumbled Word:</p>
 					<div className="inline-block bg-ink border-2 border-ember/50 rounded px-8 py-6">
 						<p className="text-3xl font-mono text-ember tracking-widest font-bold">
 							{(officer?.jumbled || officer?.jumbledWord) && (officer.jumbled || officer.jumbledWord).split("").sort().join(" ")}

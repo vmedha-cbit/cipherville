@@ -11,6 +11,8 @@ const userSchema = new mongoose.Schema(
     currentPhase: { type: Number, default: 1 },
     currentSubphase: { type: Number, default: 1 },
     lastVisitedRoute: { type: String, default: "/phase1" },
+    otpVerified: { type: Boolean, default: false }, // User must enter OTP to start game
+    gameCompleted: { type: Boolean, default: false }, // Quick access for completion status
 
     // Legacy/compatibility fields (keep for now)
     rollNumber: { type: String, default: null },
