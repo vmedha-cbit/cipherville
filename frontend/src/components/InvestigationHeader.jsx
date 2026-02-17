@@ -25,12 +25,12 @@ export default function InvestigationHeader() {
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-400 via-orange-500 to-amber-600 bg-clip-text text-transparent tracking-tight">
+            <h1 className="text-3xl font-bold text-secondary tracking-tight drop-shadow-[0_0_10px_rgba(0,245,255,0.5)]">
               CIPHERVILLE
             </h1>
-            <p className="text-base text-haze mt-1 font-medium">
+            <p className="text-base text-muted-foreground mt-1 font-medium">
               {officerName ? (
-                <span className="text-amber-300">Case Officer: <span className="font-bold text-amber-200">{officerName}</span></span>
+                <span className="text-muted-foreground">Case Officer: <span className="font-bold text-secondary">{officerName}</span></span>
               ) : (
                 "Central Investigation Database"
               )}
