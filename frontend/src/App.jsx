@@ -17,7 +17,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
 import OfficerManagement from "./pages/admin/OfficerManagement.jsx";
 import StoryManagement from "./pages/admin/StoryManagement.jsx";
 import Analytics from "./pages/admin/Analytics.jsx";
-import FastestSolvers from "./pages/admin/FastestSolvers.jsx";
+import Participants from "./pages/admin/Participants.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import AdminRoute from "./components/AdminRoute.jsx";
 import TimerDisplay from "./components/TimerDisplay.jsx";
@@ -63,7 +63,7 @@ function AppContent() {
           <Route path="/admin/officers" element={<AdminRoute><OfficerManagement /></AdminRoute>} />
           <Route path="/admin/stories" element={<AdminRoute><StoryManagement /></AdminRoute>} />
           <Route path="/admin/analytics" element={<AdminRoute><Analytics /></AdminRoute>} />
-          <Route path="/admin/fastest-solvers" element={<AdminRoute><FastestSolvers /></AdminRoute>} />
+          <Route path="/admin/participants" element={<AdminRoute><Participants /></AdminRoute>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

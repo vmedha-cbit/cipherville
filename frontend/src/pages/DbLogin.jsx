@@ -186,7 +186,7 @@ export default function DbLogin() {
             console.error("Error:", err);
           }
         }}
-        className="fixed bottom-8 right-8 px-6 py-3 bg-ink border-2 border-white/20 rounded-full text-haze font-semibold hover:bg-white/10 hover:border-amber-500/50 hover:text-white transition-all shadow-lg flex items-center gap-2"
+        className="fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 bg-ink border-2 border-white/20 rounded-full text-haze font-semibold hover:bg-white/10 hover:border-amber-500/50 hover:text-white transition-all shadow-lg flex items-center gap-2 z-50"
       >
         <span>📋</span>
         <span>Go to Officer Information</span>

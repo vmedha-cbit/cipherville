@@ -3,9 +3,9 @@ import { Link, useLocation } from "react-router-dom";
 const links = [
   { to: "/admin/dashboard", label: "Dashboard" },
   { to: "/admin/officers", label: "Officers" },
-  { to: "/admin/stories", label: "Stories" },
   { to: "/admin/analytics", label: "Analytics" },
-  { to: "/admin/fastest-solvers", label: "Fastest Solvers" }
+  { to: "/admin/stories", label: "Stories" },
+  { to: "/admin/participants", label: "Participants" }
 ];
 
 export default function AdminNav() {

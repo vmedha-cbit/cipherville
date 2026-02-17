@@ -1,14 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../providers/authContext.jsx";
 
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, session } = useAuth();
   const [rollNo, setRollNo] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (session?.userId) {
+      navigate("/officer");
+    }
+  }, [session, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

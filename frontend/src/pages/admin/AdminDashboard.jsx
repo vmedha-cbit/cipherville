@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../providers/api.js";
 import AdminNav from "../../components/AdminNav.jsx";
+import DetectiveLoading from "../../components/DetectiveLoading.jsx";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -17,9 +18,9 @@ export default function AdminDashboard() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const load = async () => {
+    const load = async (silent = false) => {
       try {
-        setLoading(true);
+        if (!silent) setLoading(true);
         setError(null);
         
         // Load admin token from localStorage and set it on api
@@ -31,16 +32,19 @@ export default function AdminDashboard() {
         api.defaults.headers.Authorization = `Bearer ${token}`;
         
         const { data } = await api.get("/admin/dashboard");
-        console.log("Dashboard data loaded:", data);
+        // Only update if data changed (simple check) or just update always since react handles diffs well
+        // Ideally deep compare or similar but for now direct set is fine, React won't re-render excessively if props same
         setData(data);
         setParticipants(data.users || []);
         
-        // Load timer duration
-        try {
-          const { data: timerData } = await api.get("/admin/timer-duration");
-          setTimerDuration(Math.floor(timerData.timerDuration / 60)); // Convert to minutes
-        } catch (err) {
-          console.error("Failed to load timer duration:", err);
+        // Load timer duration on initial load only
+        if (!silent) {
+          try {
+            const { data: timerData } = await api.get("/admin/timer-duration");
+            setTimerDuration(Math.floor(timerData.timerDuration / 60)); // Convert to minutes
+          } catch (err) {
+            console.error("Failed to load timer duration:", err);
+          }
         }
       } catch (err) {
         console.error("Failed to load dashboard:", err);
@@ -49,16 +53,16 @@ export default function AdminDashboard() {
           localStorage.removeItem("cipherville-admin-token");
           navigate("/admin/login");
         }
-        setError(err.message || "Failed to load dashboard data");
+        if (!silent) setError(err.message || "Failed to load dashboard data");
       } finally {
-        setLoading(false);
+        if (!silent) setLoading(false);
       }
     };
-    load();
+    load(false);
     
-    // Refresh dashboard data every 2 seconds to update timer status
+    // Refresh dashboard data every 2 seconds to update timer status (SILENTLY)
     const interval = setInterval(() => {
-      load();
+      load(true);
     }, 2000);
     
     return () => clearInterval(interval);
@@ -266,38 +270,32 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Officers and Stories Section */}
+        {/* Officers and Stories Summary Cards */}
         <div className="grid md:grid-cols-2 gap-4">
-          <div className="evidence-card p-6 rounded-xl">
-            <h3 className="text-xl font-bold text-amber-500 mb-4">Available Officers ({data.officers?.length || 0})</h3>
-            <div className="space-y-2 max-h-48 overflow-y-auto">
-              {data.officers && data.officers.length > 0 ? (
-                data.officers.map((officer) => (
-                  <div key={officer._id} className="bg-black/40 p-3 rounded text-sm">
-                    <p className="text-white font-semibold">{officer.name}</p>
-                    <p className="text-haze text-xs">DOB: {officer.dob}</p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-haze">No officers available</p>
-              )}
+          <div className="evidence-card p-6 rounded-xl flex items-center justify-between">
+            <div>
+               <h3 className="text-xl font-bold text-amber-500 mb-1">Officers Managed</h3>
+               <p className="text-haze text-sm">Review and edit officer profiles</p>
             </div>
+            <button 
+              onClick={() => navigate('/admin/officers')}
+              className="px-4 py-2 bg-ink border border-amber-500/30 text-amber-400 rounded hover:bg-amber-900/20 transition"
+            >
+              Manage Officers →
+            </button>
           </div>
           
-          <div className="evidence-card p-6 rounded-xl">
-            <h3 className="text-xl font-bold text-amber-500 mb-4">Available Stories ({data.stories?.length || 0})</h3>
-            <div className="space-y-2 max-h-48 overflow-y-auto">
-              {data.stories && data.stories.length > 0 ? (
-                data.stories.map((story) => (
-                  <div key={story._id} className="bg-black/40 p-3 rounded text-sm">
-                    <p className="text-white font-semibold">{story.title}</p>
-                    <p className="text-haze text-xs">{story.reportText?.substring(0, 60)}...</p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-haze">No stories available</p>
-              )}
+          <div className="evidence-card p-6 rounded-xl flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-bold text-amber-500 mb-1">Stories Managed</h3>
+              <p className="text-haze text-sm">Create and edit investigation stories</p>
             </div>
+             <button 
+              onClick={() => navigate('/admin/stories')}
+              className="px-4 py-2 bg-ink border border-amber-500/30 text-amber-400 rounded hover:bg-amber-900/20 transition"
+            >
+              Manage Stories →
+            </button>
           </div>
         </div>
 
@@ -319,8 +317,8 @@ export default function AdminDashboard() {
         <div className="evidence-card p-6 rounded-xl">
           <h3 className="text-2xl font-bold text-amber-500 mb-4">Live Participant Tracking</h3>
           {loading ? (
-            <div className="text-center py-8">
-              <p className="text-haze">Loading participants...</p>
+            <div className="flex justify-center py-8">
+              <DetectiveLoading text="Tracking suspects..." />
             </div>
           ) : (
             <div className="overflow-x-auto">

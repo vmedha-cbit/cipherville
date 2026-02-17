@@ -69,6 +69,18 @@ export const TimerProvider = ({ children }) => {
       return;
     }
 
+    // Force update on visibility change (fix for "stuck" timer after backgrounding)
+    const handleVisibilityChange = () => {
+      if (!document.hidden && gameStartedAt) {
+        const now = new Date();
+        const elapsed = Math.floor((now - gameStartedAt) / 1000);
+        const remaining = Math.max(0, timerDuration - elapsed);
+        setTimeRemaining(remaining);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     const countDown = setInterval(() => {
       const now = new Date();
       const elapsed = Math.floor((now - gameStartedAt) / 1000);
@@ -84,18 +96,21 @@ export const TimerProvider = ({ children }) => {
     }, 1000);
 
     // Initial calculation
-    const now = new Date();
-    const elapsed = Math.floor((now - gameStartedAt) / 1000);
-    const remaining = Math.max(0, timerDuration - elapsed);
-    setTimeRemaining(remaining);
+    handleVisibilityChange();
 
     // Sync with server every 5 seconds to detect desync or completion
     const syncInterval = setInterval(async () => {
+      // Don't sync if tab is hidden to save bandwidth
+      if (document.hidden) return;
+
       try {
         const { data } = await api.get(`/participants/game/status`);
         if (data.startTime) {
           const serverStartTime = new Date(data.startTime);
-          setGameStartedAt(serverStartTime);
+          // Only update if significantly different (>2s) to avoid jitter
+          if (Math.abs(serverStartTime - gameStartedAt) > 2000) {
+             setGameStartedAt(serverStartTime);
+          }
           setGameStatus(data.status || "started");
           if (data.isExpired) {
             setIsExpired(true);
@@ -109,6 +124,7 @@ export const TimerProvider = ({ children }) => {
     return () => {
       clearInterval(countDown);
       clearInterval(syncInterval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [gameStartedAt, timerDuration, gameStatus, isExpired, isPaused, session?.userId, session?.sessionToken]);
 

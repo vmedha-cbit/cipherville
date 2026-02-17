@@ -63,11 +63,10 @@ export const participantLogin = async (req, res, next) => {
     let user = await User.findOne({ rollNo });
     const now = new Date();
     
-    // Generate a session token
-    const sessionToken = jwt.sign({ userId: user?._id || rollNo, ts: now.getTime() }, env.JWT_SECRET, { expiresIn: "6h" });
-
-    // Step 2: If user does NOT exist
+    // Step 1: If user does NOT exist, create new
     if (!user) {
+      const sessionToken = jwt.sign({ userId: rollNo, ts: now.getTime() }, env.JWT_SECRET, { expiresIn: "6h" });
+      
       user = await User.create({
         rollNo,
         displayName,
@@ -83,9 +82,8 @@ export const participantLogin = async (req, res, next) => {
         lastVisitedRoute: "/officer"
       });
       
-      // Assign officer immediately after creating user
+      // Assign officer immediately
       const { Officer } = await import("../models/Officer.js");
-      const { GameState } = await import("../models/GameState.js");
       const officers = await Officer.find();
       if (officers.length > 0) {
         const picked = officers[Math.floor(Math.random() * officers.length)];
@@ -94,7 +92,8 @@ export const participantLogin = async (req, res, next) => {
       
       await user.save();
       
-      // Initialize GameState for timer
+      // Initialize GameState
+      const { GameState } = await import("../models/GameState.js");
       await GameState.findOneAndUpdate(
         { userId: user._id },
         {
@@ -114,42 +113,25 @@ export const participantLogin = async (req, res, next) => {
       });
     }
 
-    // Step 3: If user exists AND completedAt is NOT null
-    if (user.completedAt) {
+    // Step 2: If user exists
+    // Check if game is completed
+    if (user.completedAt || user.gameStatus === "completed") {
       return res.status(403).json({
         status: "completed",
         error: "Game already completed. Re-entry not allowed."
       });
     }
 
-    // Step 4: If user exists AND sessionActive = true
-    if (user.sessionActive) {
-      // Ensure officer is assigned
-      if (!user.assignedOfficer) {
-        const { Officer } = await import("../models/Officer.js");
-        const officers = await Officer.find();
-        if (officers.length > 0) {
-          const picked = officers[Math.floor(Math.random() * officers.length)];
-          user.assignedOfficer = picked._id;
-        }
-      }
-      
-      // Generate new session token
-      const newSessionToken = jwt.sign({ userId: user._id, ts: now.getTime() }, env.JWT_SECRET, { expiresIn: "6h" });
-      user.activeSession = newSessionToken;
-      await user.save();
-      return res.json({
-        status: "resume-session",
-        userId: user._id,
-        sessionToken: newSessionToken,
-        lastVisitedRoute: user.lastVisitedRoute || "/officer"
-      });
-    }
-
-    // Step 5: If user exists AND sessionActive = false AND completedAt is null
-    const newSessionToken = jwt.sign({ userId: user._id, ts: now.getTime() }, env.JWT_SECRET, { expiresIn: "6h" });
+    // Check if game is timeout/expired (optional, depending on requirements, but user said 'after 30 mins... local progress cleared')
+    // If we want to strictly enforce 30 mins from start:
+    // const elapsed = (now - user.startedAt) / 1000;
+    // if (elapsed > 1800) { ... handle timeout ... }
     
-    // Ensure officer is assigned
+    // RESUME SESSION (Whether sessionActive was true or false)
+    // We always generate a new token to ensure validity, but we KEEP the progress.
+    const sessionToken = jwt.sign({ userId: user._id, ts: now.getTime() }, env.JWT_SECRET, { expiresIn: "6h" });
+    
+    // Ensure officer is assigned (recovery)
     if (!user.assignedOfficer) {
       const { Officer } = await import("../models/Officer.js");
       const officers = await Officer.find();
@@ -160,35 +142,16 @@ export const participantLogin = async (req, res, next) => {
     }
     
     user.sessionActive = true;
-    user.activeSession = newSessionToken;
-    user.startedAt = now;
-    user.gameStartedAt = now;
-    user.timerDuration = 1800;
-    user.gameStatus = "playing";
-    user.currentPhase = 1;
-    user.currentSubphase = 1;
-    user.lastVisitedRoute = "/officer";
+    user.activeSession = sessionToken;
     await user.save();
     
-    // Initialize GameState for timer
-    const { GameState } = await import("../models/GameState.js");
-    await GameState.findOneAndUpdate(
-      { userId: user._id },
-      {
-        userId: user._id,
-        status: "started",
-        startTime: now,
-        duration: 1800
-      },
-      { upsert: true, new: true }
-    );
-    
     return res.json({
-      status: "new-session",
+      status: "resume-session",
       userId: user._id,
-      sessionToken: newSessionToken,
-      lastVisitedRoute: "/officer"
+      sessionToken,
+      lastVisitedRoute: user.lastVisitedRoute || "/officer"
     });
+
   } catch (err) {
     next(err);
   }
@@ -197,9 +160,12 @@ export const participantLogin = async (req, res, next) => {
 export const participantLogout = async (req, res, next) => {
   try {
     const user = req.user;
-    user.activeSession = null;
-    await user.save();
-    await logEvent("participant-logout", { userId: user._id, roomId: user.roomId });
+    if (user) {
+      user.sessionActive = false;
+      user.activeSession = null;
+      await user.save();
+      await logEvent("participant-logout", { userId: user._id, roomId: user.roomId });
+    }
     res.json({ ok: true });
   } catch (err) {
     next(err);
