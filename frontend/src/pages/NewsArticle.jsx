@@ -29,8 +29,17 @@ export default function NewsArticle() {
 
   if (!article) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-700">Article not found</p>
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Article Not Found</h2>
+        <p className="text-gray-600 mb-6 text-center max-w-md">
+          This article is exclusive to Cipherville investigators. Please login to access your assigned case files.
+        </p>
+        <a 
+          href="/"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition duration-200"
+        >
+          Go to Login
+        </a>
       </div>
     );
   }
