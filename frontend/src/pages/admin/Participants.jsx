@@ -108,7 +108,7 @@ export default function Participants() {
                         className="border-b border-white/5 hover:bg-white/10 cursor-pointer transition-colors"
                         onClick={() => setSelectedParticipant(user)}
                     >
-                      <td className="p-3 text-white font-mono font-bold">{user.rollNumber}</td>
+                      <td className="p-3 text-white font-mono font-bold">{user.rollNo || user.rollNumber}</td>
                       <td className="p-3 text-white">{user.displayName || '-'}</td>
                       <td className="p-3">{getStatusBadge(user)}</td>
                       <td className="p-3 text-haze">{user.phase}</td>
@@ -142,7 +142,7 @@ export default function Participants() {
               <div className="flex justify-between items-center mb-6 sticky top-0 bg-inherit z-10 border-b border-white/10 pb-4">
                 <div>
                     <h3 className="text-2xl font-bold text-amber-500">
-                    Suspect File: {selectedParticipant.rollNumber}
+                    Suspect File: {selectedParticipant.rollNo || selectedParticipant.rollNumber}
                     </h3>
                     <p className="text-haze text-sm mt-1">{selectedParticipant.displayName}</p>
                 </div>
