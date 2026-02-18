@@ -254,7 +254,7 @@ export const seedOfficers = async (req, res, next) => {
         "dob": "23121985",
         "jumbledWord": "GOL",
         "answer": "LOG",
-        "puzzleFolder": "puzzle10",
+        "puzzleFolder": "puzzle12",
         "routeOptions": [
           { "label": "Metro", "content": "Logging terminal data", "isCorrect": true },
           { "label": "Harbor", "content": "Timber port records", "isCorrect": false },
