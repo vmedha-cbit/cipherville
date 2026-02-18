@@ -168,6 +168,56 @@
   animation: magnify 3s ease-in-out infinite;
 }
 
+/* Typewriter reveal */
+@keyframes typewriter {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+/* Glitch flicker */
+@keyframes glitch {
+  0%, 100% { opacity: 1; transform: translate(0); }
+  20% { opacity: 0.8; transform: translate(-2px, 1px); }
+  40% { opacity: 1; transform: translate(1px, -1px); }
+  60% { opacity: 0.9; transform: translate(-1px, 2px); }
+  80% { opacity: 1; transform: translate(2px, -1px); }
+}
+
+.glitch-text {
+  animation: glitch 0.3s ease-in-out;
+}
+
+/* Radar sweep */
+@keyframes radar-sweep {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Fade in up stagger */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Evidence stamp */
+@keyframes stamp {
+  0% { transform: scale(3) rotate(-15deg); opacity: 0; }
+  50% { transform: scale(1.1) rotate(-12deg); opacity: 0.8; }
+  100% { transform: scale(1) rotate(-12deg); opacity: 1; }
+}
+
+/* Horizontal scan */
+@keyframes h-scan {
+  0% { left: -30%; }
+  100% { left: 130%; }
+}
+
+/* Data stream */
+@keyframes data-stream {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

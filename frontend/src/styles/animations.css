@@ -1,0 +1,65 @@
+/* --- New Animations (Ported from CrimeBasedUI) --- */
+
+/* Data Stream */
+@keyframes data-stream {
+    0% {
+        transform: translateY(-100%);
+    }
+
+    100% {
+        transform: translateY(100%);
+    }
+}
+
+/* Radar Sweep */
+@keyframes radar-sweep {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Fade In Up */
+@keyframes fade-in-up {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Stamp Effect */
+@keyframes stamp {
+    0% {
+        opacity: 0;
+        transform: scale(2) rotate(-10deg);
+    }
+
+    70% {
+        opacity: 1;
+        transform: scale(0.9) rotate(-2deg);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+/* Horizontal Scan */
+@keyframes h-scan {
+    0% {
+        left: -100%;
+    }
+
+    100% {
+        left: 200%;
+    }
+}

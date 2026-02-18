@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../providers/api.js";
-import TimerDisplay from "../components/TimerDisplay.jsx";
+import DetectiveLoading from "../components/DetectiveLoading.jsx";
 
 export default function Officer() {
   const navigate = useNavigate();
@@ -75,19 +75,15 @@ export default function Officer() {
       <div className="absolute inset-0 z-0 opacity-10 fingerprint-bg"></div>
       <div className="absolute inset-0 z-0 grid-overlay opacity-20"></div>
       
+      {/* Global Loader for this page */}
+      <DetectiveLoading isLoading={isLoading} />
+      
       {/* Header handled by App layout usually but just in case */}
       
       <div className="max-w-4xl w-full relative z-10">
-          {/* Loading State */}
-          {isLoading && (
-            <div className="bg-card border border-border p-12 rounded-xl text-center shadow-2xl flex flex-col items-center justify-center min-h-[400px]">
-              <div className="text-6xl mb-6 magnify-animate text-primary">🔍</div>
-              <h2 className="text-xl font-mono text-primary animate-pulse tracking-widest">ACCESSING CLASSIFIED PERSONNEL FILES...</h2>
-              <div className="mt-4 w-64 h-1 bg-muted rounded-full overflow-hidden">
-                 <div className="h-full bg-primary animate-[wiggle_1s_ease-in-out_infinite] w-1/2"></div>
-              </div>
-            </div>
-          )}
+          {/* Loading State - Removed manual block as DetectiveLoading handles it */}
+          
+          {/* Error State */}
 
           {/* Error State */}
           {error && !isLoading && (
